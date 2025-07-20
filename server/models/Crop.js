@@ -1,23 +1,24 @@
 const mongoose = require('mongoose');
 
-const cropSchema = new mongoose.Schema({
-  cropName: {
+const cropSubSchema = new mongoose.Schema({
+  name: {
     type: String,
     required: true,
+  },
+  unit: {
+    type: String,
+    required: true,
+    enum: ['kg', 'dozen', 'unit'],
   },
   quantity: {
     type: Number,
-    required: true,
-  },
-  farmerName: {
-    type: String,
     required: true,
   },
   price: {
     type: Number,
     required: true,
   },
-  imageUrl: {
+  image: {
     type: String,
     required: true,
   },
@@ -26,9 +27,25 @@ const cropSchema = new mongoose.Schema({
     required: true,
     enum: ['vegetables', 'fruits'],
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const cropSchema = new mongoose.Schema({
   farmerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true,
+    unique: true,
+  },
+  farmerName: {
+    type: String,
     required: true,
   },
   farmerDetails: {
@@ -48,18 +65,13 @@ const cropSchema = new mongoose.Schema({
     latitude: { type: Number, default: null },
     longitude: { type: Number, default: null },
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  crops: [cropSubSchema],
 });
 
 cropSchema.pre('save', function (next) {
-  this.updatedAt = Date.now();
+  this.crops.forEach((crop) => {
+    crop.updatedAt = Date.now();
+  });
   next();
 });
 
