@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
+import AuthContext from './context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -63,9 +63,9 @@ const Login = () => {
           </button>
         </form>
         <p className="mt-4 text-center text-gray-600">
-          Interested in selling your crops?{' '}
-          <Link to="/register-farmer" className="text-green-500 hover:underline">
-            Register as a Farmer
+          Don’t have an account?{' '}
+          <Link to="/register" className="text-green-500 hover:underline">
+            Register
           </Link>
         </p>
       </div>

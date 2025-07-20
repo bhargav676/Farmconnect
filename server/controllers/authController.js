@@ -7,7 +7,9 @@ exports.register = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').isIn(['Farmer', 'Customer']).withMessage('Role must be Farmer or Customer'),
+  body('role').optional().isIn(['Farmer', 'Customer', 'Admin']).withMessage('Invalid role'),
+  body('farmLocation').optional().trim(),
+  body('cropTypes').optional().trim(),
 
   async (req, res) => {
     const errors = validationResult(req);
@@ -15,7 +17,7 @@ exports.register = [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, farmLocation, cropTypes } = req.body;
 
     try {
       const existingUser = await User.findOne({ email });
@@ -24,14 +26,19 @@ exports.register = [
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new User({ name, email, password: hashedPassword, role });
+      const userRole = role || 'Customer';
+      const userData = { name, email, password: hashedPassword, role: userRole };
+      if (farmLocation && farmLocation.trim()) userData.farmLocation = farmLocation.trim();
+      if (cropTypes && cropTypes.trim()) userData.cropTypes = cropTypes.trim();
+
+      const user = new User(userData);
       await user.save();
 
       const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
 
-      res.status(201).json({ token, role, message: 'Registration successful' });
+      res.status(201).json({ token, role: user.role, message: 'Registration successful' });
     } catch (error) {
       res.status(500).json({ message: 'Server error' });
     }

@@ -2,18 +2,27 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from './context/AuthContext';
 
-const Register = () => {
+const RegisterFarmer = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [farmLocation, setFarmLocation] = useState('');
+  const [cropTypes, setCropTypes] = useState('');
+  const [error, setError] = useState(''); // For validation error message
   const { register, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    // Client-side validation
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+    setError(''); // Clear error if validation passes
     try {
-      await register(name, email, password); // Role defaults to 'Customer' on backend
-      navigate('/customer/dashboard');
+      await register(name, email, password, 'Farmer', { farmLocation, cropTypes });
+      navigate('/farmer/dashboard');
     } catch (err) {
       // Error handled by toast in AuthContext
     }
@@ -22,7 +31,7 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Register as a Customer</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Register as a Farmer</h2>
         <form onSubmit={handleRegister}>
           <div className="mb-4">
             <label className="block text-gray-700">Name</label>
@@ -58,6 +67,29 @@ const Register = () => {
               disabled={loading}
               autoComplete="new-password"
             />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Farm Location</label>
+            <input
+              type="text"
+              value={farmLocation}
+              onChange={(e) => setFarmLocation(e.target.value)}
+              className="w-full p-2 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="e.g., Village, District"
+              disabled={loading}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Crop Types</label>
+            <input
+              type="text"
+              value={cropTypes}
+              onChange={(e) => setCropTypes(e.target.value)}
+              className="w-full p-2 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="e.g., Wheat, Rice"
+              disabled={loading}
+            />
           </div>
           <button
             type="submit"
@@ -74,15 +106,12 @@ const Register = () => {
             )}
           </button>
         </form>
-        <p className="mt-4 text-center text-gray-600">
-          Interested in selling your crops?{' '}
-          <Link to="/register-farmer" className="text-green-500 hover:underline">
-            Register as a Farmer
-          </Link>
+        <p className="mt-4 text-center">
+          Already have an account? <Link to="/" className="text-green-500 hover:underline">Login</Link>
         </p>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default RegisterFarmer;
