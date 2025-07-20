@@ -60,7 +60,7 @@ const CropUpdateDelete = () => {
       }
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:5000/api/auth/cropdata', {
+        const res = await axios.get('http://localhost:5000/api/crops/cropdata', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCrops(res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
@@ -91,7 +91,7 @@ const CropUpdateDelete = () => {
     }
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/auth/${cropId}`,
+        `http://localhost:5000/api/crops/${cropId}`,
         { quantity: parseFloat(quantity), price: parseFloat(price) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -108,7 +108,7 @@ const CropUpdateDelete = () => {
     if (!cropToDelete) return;
     try {
       const res = await axios.delete(
-        `http://localhost:5000/api/auth/${cropToDelete._id}`,
+        `http://localhost:5000/api/crops/${cropToDelete._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCrops(res.data.crops.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));

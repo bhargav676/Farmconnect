@@ -3,6 +3,7 @@ import Navbar from './pages/Navbar';
 import CropUpload from './pages/CropUpload';
 import CropUpdateDelete from './pages/CropUpdateDelete';
 import Dashboard from './pages/Dashboard';
+import Purchase from './pages/Purchase';
 import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 

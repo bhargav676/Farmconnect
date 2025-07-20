@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
-const CustomerPurchase = require('../models/CustomerPurchase');
+const Purchase = require('../models/Purchase');
 
-exports.getFarmerDetailsAndPurchases = async (req, res) => {
+exports.getFarmerPurchases = async (req, res) => {
   const { farmerId } = req.params;
-  const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', cropName } = req.query;
 
   try {
     // Validate farmerId format
@@ -11,38 +10,11 @@ exports.getFarmerDetailsAndPurchases = async (req, res) => {
       return res.status(400).json({ message: 'Invalid farmer ID format' });
     }
 
-    // Convert page and limit to numbers
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    if (pageNum < 1 || limitNum < 1) {
-      return res.status(400).json({ message: 'Page and limit must be positive integers' });
-    }
-
-    // Validate sortBy and sortOrder
-    const validSortFields = ['createdAt', 'totalPrice', 'quantity'];
-    if (!validSortFields.includes(sortBy)) {
-      return res.status(400).json({ message: `SortBy must be one of: ${validSortFields.join(', ')}` });
-    }
-    const sortDirection = sortOrder === 'asc' ? 1 : -1;
-
-    // Build query
-    const query = { farmerId };
-    if (cropName) {
-      query.cropName = cropName; // Filter by cropName if provided
-    }
-
-    // Fetch purchases with pagination and sorting
-    const purchases = await CustomerPurchase.find(query)
-      .sort({ [sortBy]: sortDirection })
-      .skip((pageNum - 1) * limitNum)
-      .limit(limitNum)
-      .lean();
-
-    // Calculate total purchases for pagination
-    const totalPurchases = await CustomerPurchase.countDocuments(query);
+    // Fetch all purchases for the farmerId
+    const purchases = await Purchase.find({ farmerId });
 
     // Generate summary statistics
-    const summary = await CustomerPurchase.aggregate([
+    const summary = await Purchase.aggregate([
       { $match: { farmerId: new mongoose.Types.ObjectId(farmerId) } },
       {
         $group: {
@@ -74,12 +46,7 @@ exports.getFarmerDetailsAndPurchases = async (req, res) => {
         totalRevenue: stat.totalRevenue,
         purchaseCount: stat.purchaseCount,
       })),
-      pagination: {
-        currentPage: pageNum,
-        totalPages: Math.ceil(totalPurchases / limitNum),
-        totalPurchases,
-        limit: limitNum,
-      },
+      totalPurchases: purchases.length,
     };
 
     res.status(200).json(response);

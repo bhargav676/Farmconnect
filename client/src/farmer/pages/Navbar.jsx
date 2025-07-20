@@ -58,6 +58,10 @@ const Navbar = () => {
               <FiEdit className="mr-2" />
               Manage Crops
             </NavLink>
+            <NavLink to="/farmer/dashboard/purchase" className={getNavLinkClass}>
+              <FiEdit className="mr-2" />
+              purchase
+            </NavLink>
           </div>
           
           {/* Desktop User Info & Logout */}
