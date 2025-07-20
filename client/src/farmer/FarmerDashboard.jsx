@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Select from 'react-select';
+import { ClipLoader } from 'react-spinners';
 
 const FarmerDashboard = () => {
   const { user, setUser, logout } = useContext(AuthContext);
@@ -11,11 +13,12 @@ const FarmerDashboard = () => {
   const [formData, setFormData] = useState({
     cropName: '',
     quantity: '',
+    unit: '',
     price: '',
-    imageUrl: '',
+    image: '',
     type: '',
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -26,12 +29,13 @@ const FarmerDashboard = () => {
     console.log('Token from localStorage:', token);
   }, [user, token]);
 
-  // Fetch user data on mount
+  // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) {
-        console.error('No token available, redirecting to login');
-        setError('Please log in to continue');
+        setErrors({ general: 'Please log in to continue' });
+        toast.error('Please log in to continue');
+        logout();
         navigate('/login');
         return;
       }
@@ -41,26 +45,23 @@ const FarmerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log('Fetched user data:', res.data);
-        setUser({
-          _id: res.data._id,
-          email: res.data.email,
-          name: res.data.name,
-          role: res.data.role.toLowerCase(),
-        });
+        setUser(res.data);
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch user:', err.response?.data || err.message);
-        setError('Failed to load user data. Please log in again.');
+        setErrors({ general: 'Failed to load user data. Please log in again.' });
+        toast.error('Failed to load user data. Please log in again.');
+        logout();
         navigate('/login');
       }
     };
 
-    if (!user || !user._id) {
+    if (!user) {
       fetchUser();
     } else {
       setLoading(false);
     }
-  }, [user, setUser, navigate, token]);
+  }, [user, setUser, navigate, logout, token]);
 
   // Fetch crop list from api.json
   useEffect(() => {
@@ -75,7 +76,7 @@ const FarmerDashboard = () => {
         setCropList(data);
       } catch (err) {
         console.error('Failed to fetch crop list:', err.message);
-        setError('Failed to load crop list');
+        setErrors({ general: 'Failed to load crop list. Please try refreshing.' });
         toast.error('Failed to load crop list');
       }
     };
@@ -83,55 +84,103 @@ const FarmerDashboard = () => {
   }, []);
 
   // Handle crop selection
-  const handleCropSelect = (e) => {
-    const selectedCrop = cropList.find((crop) => crop.name === e.target.value);
+  const handleCropSelect = (selectedOption) => {
+    console.log('Selected crop:', selectedOption);
+    const selectedCrop = cropList.find((crop) => crop.name === selectedOption?.value);
     if (selectedCrop) {
       setFormData({
         ...formData,
         cropName: selectedCrop.name,
-        imageUrl: selectedCrop.image,
+        image: selectedCrop.image,
         type: selectedCrop.type,
+        unit: selectedCrop.unit,
+      });
+      setErrors((prev) => ({ ...prev, cropName: '' }));
+      console.log('Updated formData:', {
+        cropName: selectedCrop.name,
+        image: selectedCrop.image,
+        type: selectedCrop.type,
+        unit: selectedCrop.unit,
       });
     } else {
-      setFormData({ ...formData, cropName: '', imageUrl: '', type: '' });
+      setFormData({ ...formData, cropName: '', image: '', type: '', unit: '' });
+      setErrors((prev) => ({ ...prev, cropName: 'Please select a crop' }));
     }
   };
 
-  // Handle form input changes
+  // Handle form input changes with validation
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    console.log(`Input changed: ${name} = ${value}`);
+    setFormData({ ...formData, [name]: value });
+
+    // Real-time validation
+    const newErrors = { ...errors };
+    if (name === 'quantity') {
+      if (!value) {
+        newErrors.quantity = 'Quantity is required';
+      } else if (parseFloat(value) <= 0) {
+        newErrors.quantity = 'Quantity must be positive';
+      } else {
+        delete newErrors.quantity;
+      }
+    }
+    if (name === 'price') {
+      if (!value) {
+        newErrors.price = 'Price is required';
+      } else if (parseFloat(value) <= 0) {
+        newErrors.price = 'Price must be positive';
+      } else {
+        delete newErrors.price;
+      }
+    }
+    setErrors(newErrors);
+    console.log('Current errors:', newErrors);
+  };
+
+  // Check if form is valid
+  const isFormValid = () => {
+    return (
+      formData.cropName &&
+      formData.quantity &&
+      parseFloat(formData.quantity) > 0 &&
+      formData.price &&
+      parseFloat(formData.price) > 0 &&
+      formData.image &&
+      formData.type &&
+      formData.unit &&
+      user?._id &&
+      token
+    );
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    console.log('Form submitted with data:', formData);
+    setErrors({});
     setSuccess('');
 
-    // Check if user is a farmer
-    if (!user || user.role !== 'farmer') {
-      setError('Only farmers can post crops. Please log in with a farmer account.');
-      toast.error('Only farmers can post crops.');
-      return;
-    }
-
-    // Validate form fields
-    if (!formData.cropName || !formData.quantity || !formData.price || !formData.imageUrl || !formData.type || !user._id) {
-      setError('All fields are required');
-      toast.error('All fields are required');
-      return;
-    }
-
-    // Validate token
-    if (!token) {
-      setError('Authentication token missing. Please log in again.');
-      toast.error('Authentication token missing. Please log in again.');
-      navigate('/login');
+    if (!isFormValid()) {
+      const newErrors = {};
+      if (!formData.cropName) newErrors.cropName = 'Please select a crop';
+      if (!formData.quantity) newErrors.quantity = 'Quantity is required';
+      else if (parseFloat(formData.quantity) <= 0) newErrors.quantity = 'Quantity must be positive';
+      if (!formData.price) newErrors.price = 'Price is required';
+      else if (parseFloat(formData.price) <= 0) newErrors.price = 'Price must be positive';
+      if (!formData.image) newErrors.image = 'Image URL is required';
+      if (!formData.type) newErrors.type = 'Type is required';
+      if (!formData.unit) newErrors.unit = 'Unit is required';
+      if (!user?._id) newErrors.general = 'User ID is missing';
+      if (!token) newErrors.general = 'Authentication token missing. Please log in again.';
+      console.log('Validation errors:', newErrors);
+      setErrors(newErrors);
+      toast.error('Please fix the errors in the form');
       return;
     }
 
     try {
-      console.log('Posting crop with payload:', { ...formData, farmerId: user._id });
+      console.log('Sending POST request with payload:', { ...formData, farmerId: user._id });
       const res = await axios.post(
         'http://localhost:5000/api/auth/crop',
         { ...formData, farmerId: user._id },
@@ -140,91 +189,97 @@ const FarmerDashboard = () => {
       console.log('Post crop response:', res.data);
       setSuccess(res.data.message);
       toast.success(res.data.message);
-      setFormData({ cropName: '', quantity: '', price: '', imageUrl: '', type: '' });
+      setFormData({ cropName: '', quantity: '', unit: '', price: '', image: '', type: '' });
+      setErrors({});
     } catch (err) {
       console.error('Error posting crop:', err.response?.data || err.message);
-      const message = err.response?.data?.message || 'Failed to post crop';
-      setError(message);
-      toast.error(message);
       if (err.response?.status === 401) {
-        setError('Session expired or invalid token. Please log in again.');
+        setErrors({ general: 'Session expired or invalid token. Please log in again.' });
         toast.error('Session expired. Please log in again.');
+        logout();
         navigate('/login');
+      } else {
+        const message = err.response?.data?.message || 'Failed to post crop';
+        setErrors({ general: message });
+        toast.error(message);
       }
     }
   };
 
   if (loading) {
-    return <p className="text-center mt-4">Loading user info...</p>;
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <ClipLoader color="#10B981" size={50} />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h2 className="text-3xl font-bold text-center mb-6">Farmer Dashboard</h2>
-      <p className="text-center mb-4">Welcome, {user?.name || 'Farmer'}! Manage your farm products here.</p>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6">Farmer Dashboard</h2>
+      <p className="text-center mb-4">Welcome, {user?.name}! Manage your farm products here.</p>
 
-      <div className="mt-6 text-center bg-white p-4 rounded shadow-md">
-        <p>User ID: {user?._id || 'Not available'}</p>
-        <p>Role: {user?.role || 'Not available'}</p>
+      <div className="mt-6 text-center bg-white p-4 rounded-lg shadow-md max-w-md mx-auto">
+        <p>User ID: {user?._id}</p>
       </div>
 
       {/* Crop Posting Form */}
-      <div className="mt-8 max-w-md mx-auto bg-white p-6 rounded shadow-md">
+      <div className="mt-8 max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4">Post a Crop</h3>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {errors.general && <p className="text-red-500 mb-4">{errors.general}</p>}
         {success && <p className="text-green-500 mb-4">{success}</p>}
-        {user?.role !== 'farmer' && (
-          <p className="text-red-500 mb-4">Only farmers can post crops.</p>
-        )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Select Crop</label>
-            <select
-              name="cropName"
-              value={formData.cropName}
+            <Select
+              options={cropList.map((crop) => ({
+                value: crop.name,
+                label: `${crop.name} (${crop.type})`,
+              }))}
               onChange={handleCropSelect}
-              className="w-full p-2 border rounded"
-              disabled={user?.role !== 'farmer'}
-            >
-              <option value="">Select a crop</option>
-              {cropList.map((crop) => (
-                <option key={crop.name} value={crop.name}>
-                  {crop.name} ({crop.type})
-                </option>
-              ))}
-            </select>
+              placeholder="Search for a crop..."
+              className="w-full"
+              isClearable
+            />
+            {errors.cropName && <p className="text-red-500 text-sm mt-1">{errors.cropName}</p>}
           </div>
+          {formData.image && (
+            <div className="mb-4">
+              <img src={formData.image} alt={formData.cropName} className="w-32 h-32 object-cover rounded mx-auto" />
+            </div>
+          )}
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Quantity (kg)</label>
+            <label className="block text-gray-700 mb-2">Quantity ({formData.unit || 'select a crop'})</label>
             <input
               type="number"
               name="quantity"
               value={formData.quantity}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              placeholder="Enter quantity"
+              className={`w-full p-2 border rounded ${errors.quantity ? 'border-red-500' : ''}`}
+              placeholder={`Enter quantity in ${formData.unit || 'units'}`}
               min="0"
-              disabled={user?.role !== 'farmer'}
+              step="0.01"
             />
+            {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Price (per kg)</label>
+            <label className="block text-gray-700 mb-2">Price (per {formData.unit || 'unit'})</label>
             <input
               type="number"
               name="price"
               value={formData.price}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              placeholder="Enter price"
+              className={`w-full p-2 border rounded ${errors.price ? 'border-red-500' : ''}`}
+              placeholder={`Enter price per ${formData.unit || 'unit'}`}
               min="0"
               step="0.01"
-              disabled={user?.role !== 'farmer'}
             />
+            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
           </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 disabled:bg-gray-400"
-            disabled={user?.role !== 'farmer'}
+            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors"
+            onClick={() => console.log('Post Crop button clicked', { formData, isValid: isFormValid() })}
           >
             Post Crop
           </button>
@@ -234,7 +289,7 @@ const FarmerDashboard = () => {
       <div className="text-center mt-6">
         <button
           onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
         >
           Logout
         </button>

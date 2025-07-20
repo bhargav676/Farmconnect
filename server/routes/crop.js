@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const cropController = require('../controllers/cropController');
 const authMiddleware = require('../middleware/auth');
+const nearbyCropController = require('../controllers/nearbyCropController')
 
-router.get('/user/basic', authMiddleware(),cropController.getUserBasicDetails);
 router.post('/crop', authMiddleware(), cropController.postCrop);
+router.get('/nearby-crops',nearbyCropController.getNearbyCrops);
 
-module.exports = router;
+
+module.exports = router;   
