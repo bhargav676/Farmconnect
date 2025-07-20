@@ -1,19 +1,21 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import Login from './Login';
-import Register from './Register';
-import RegisterFarmer from './RegisterFarmer';
-import AdminDashboard from './admin/AdminDashboard';
-import FarmerDashboard from './farmer/FarmerDashboard';
-import CustomerDashboard from './customer/CustomerDashboard';
-import PrivateRoute from './PrivateRoute';
-import ErrorBoundary from './ErrorBoundary';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Login from "./Login";
+import Register from "./Register";
+import RegisterFarmer from "./RegisterFarmer";
+import AdminDashboard from "./admin/AdminDashboard";
+import FarmerDashboard from "./farmer/FarmerDashboard";
+import CustomerDashboard from "./customer/CustomerDashboard";
+import ApprovalWaiting from "./admin/ApprovalWaiting";
+import Rejected from "./admin/Rejected";
+import PrivateRoute from "./PrivateRoute";
+import ErrorBoundary from "./ErrorBoundary";
 
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -21,7 +23,7 @@ function App() {
             <Route
               path="/admin/dashboard"
               element={
-                <PrivateRoute roles={['Admin']}>
+                <PrivateRoute roles={["admin"]}>
                   <AdminDashboard />
                 </PrivateRoute>
               }
@@ -29,7 +31,7 @@ function App() {
             <Route
               path="/farmer/dashboard"
               element={
-                <PrivateRoute roles={['Farmer']}>
+                <PrivateRoute roles={["farmer"]} requireApproved={true}>
                   <FarmerDashboard />
                 </PrivateRoute>
               }
@@ -37,14 +39,30 @@ function App() {
             <Route
               path="/customer/dashboard"
               element={
-                <PrivateRoute roles={['Customer']}>
+                <PrivateRoute roles={["customer"]}>
                   <CustomerDashboard />
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/farmer/approval-waiting"
+              element={
+                <PrivateRoute roles={["farmer"]}>
+                  <ApprovalWaiting />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/farmer/rejected"
+              element={
+                <PrivateRoute roles={["farmer"]}>
+                  <Rejected />
+                </PrivateRoute>
+              }
+            />
           </Routes>
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </ErrorBoundary>
   );
 }
