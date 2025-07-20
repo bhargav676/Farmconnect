@@ -70,7 +70,7 @@ exports.postCrop = [
         type,
       });
 
-      // Save the document
+
       await cropDoc.save();
       res.status(201).json({ message: 'Crop posted successfully', crop: cropDoc.crops[cropDoc.crops.length - 1] });
     } catch (err) {
@@ -79,3 +79,77 @@ exports.postCrop = [
     }
   },
 ];
+
+exports.getFarmerCrops = async (req, res) => {
+  try {
+    // req.user.id should be set by your auth middleware
+    const cropDoc = await Crop.findOne({ farmerId: req.user.id });
+
+    if (!cropDoc || cropDoc.crops.length === 0) {
+      return res.status(200).json([]); // Return empty array if no crops
+    }
+
+    res.json(cropDoc.crops);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// Controller to update a crop
+exports.updateCrop = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { cropId } = req.params;
+  const { quantity, price } = req.body;
+
+  try {
+    const cropDoc = await Crop.findOne({ "crops._id": cropId, farmerId: req.user.id });
+
+    if (!cropDoc) {
+      return res.status(404).json({ msg: 'Crop not found or you are not authorized' });
+    }
+
+    // Find the specific crop in the array using Mongoose's id() method
+    const cropToUpdate = cropDoc.crops.id(cropId);
+    if (!cropToUpdate) {
+        return res.status(404).json({ msg: 'Sub-document crop not found' });
+    }
+
+    // Update fields
+    cropToUpdate.quantity = quantity;
+    cropToUpdate.price = price;
+
+    await cropDoc.save(); // Save the parent document
+    res.json({ message: 'Crop updated successfully', crops: cropDoc.crops });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// Controller to delete a crop
+exports.deleteCrop = async (req, res) => {
+  const { cropId } = req.params;
+
+  try {
+    const cropDoc = await Crop.findOneAndUpdate(
+      { "crops._id": cropId, farmerId: req.user.id },
+      { $pull: { crops: { _id: cropId } } }, // Use $pull to remove from array
+      { new: true }
+    );
+
+    if (!cropDoc) {
+      return res.status(404).json({ msg: 'Crop not found or you are not authorized to delete' });
+    }
+
+    res.json({ message: 'Crop deleted successfully', crops: cropDoc.crops });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
