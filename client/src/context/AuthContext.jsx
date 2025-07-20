@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          setUser({ email: response.data.email, role: response.data.role });
+          setUser(response.data); 
           setLoading(false);
         })
         .catch(() => {
@@ -34,9 +34,15 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
-      setUser({ email, role: response.data.role });
+
+      // Fetch full user data after login
+      const userRes = await axios.get('http://localhost:5000/api/auth/me', {
+        headers: { Authorization: `Bearer ${response.data.token}` },
+      });
+
+      setUser(userRes.data); // 👈 Store full user object
       toast.success('Login successful!');
-      return response.data;
+      return userRes.data;
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
@@ -49,21 +55,25 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, role = 'Customer', additionalFields = {}) => {
     try {
       setLoading(true);
-      console.log('Register request payload:', { name, email, password, role, ...additionalFields }); // Debug log
       const response = await axios.post('http://localhost:5000/api/auth/register', {
         name,
         email,
         password,
         role,
-        ...additionalFields, // Spread additional fields (e.g., farmLocation, cropTypes)
+        ...additionalFields,
       });
       localStorage.setItem('token', response.data.token);
-      setUser({ email, role: response.data.role });
+
+      // Fetch full user data after registration
+      const userRes = await axios.get('http://localhost:5000/api/auth/me', {
+        headers: { Authorization: `Bearer ${response.data.token}` },
+      });
+
+      setUser(userRes.data); // 👈 Store full user object
       toast.success('Registration successful!');
-      return response.data;
+      return userRes.data;
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
-      console.error('Registration error:', error.response?.data); // Debug error
       toast.error(message);
       throw error;
     } finally {
@@ -76,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     toast.info('Logged out successfully');
   };
+  
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout }}>

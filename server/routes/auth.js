@@ -7,4 +7,7 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.get('/me', authMiddleware(), authController.getUser);
 
+router.get('/user/basic', authMiddleware(), authController.getUserBasicDetails);
+router.post('/crop', authMiddleware(), authController.postCrop);
+
 module.exports = router;
