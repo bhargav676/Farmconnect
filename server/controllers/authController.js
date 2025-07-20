@@ -1,16 +1,32 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
-const Crop = require('../models/Crop');
+const Farmer = require('../models/Farmer');
 
 exports.register = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').optional().isIn(['Farmer', 'Customer', 'Admin']).withMessage('Invalid role'),
-  body('farmLocation').optional().trim(),
-  body('cropTypes').optional().trim(),
+  body('role').optional().isIn(['farmer', 'customer', 'admin']).withMessage('Invalid role'),
+  body('farmerData.aadhaarNumber')
+    .optional()
+    .matches(/^\d{12}$/)
+    .withMessage('Aadhaar number must be 12 digits'),
+  body('farmerData.address').optional().notEmpty().withMessage('Address is required for farmers'),
+  body('farmerData.state').optional().notEmpty().withMessage('State is required for farmers'),
+  body('farmerData.district').optional().notEmpty().withMessage('District is required for farmers'),
+  body('farmerData.villageMandal').optional().notEmpty().withMessage('Village/Mandal is required for farmers'),
+  body('farmerData.pincode').optional().matches(/^\d{6}$/).withMessage('PIN code must be 6 digits'),
+  body('farmerData.cropsGrown')
+    .optional()
+    .isArray({ min: 1 })
+    .withMessage('At least one crop is required for farmers'),
+  body('farmerData.upiId')
+    .optional()
+    .matches(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/)
+    .withMessage('Invalid UPI ID format'),
+  body('farmerData.landProofDocument').optional().notEmpty().withMessage('Land proof document is required for farmers'),
 
   async (req, res) => {
     const errors = validationResult(req);
@@ -18,7 +34,7 @@ exports.register = [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role, farmLocation, cropTypes } = req.body;
+    const { name, email, password, role, farmerData } = req.body;
 
     try {
       const existingUser = await User.findOne({ email });
@@ -27,23 +43,52 @@ exports.register = [
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const userRole = role || 'Customer';
-      const userData = { name, email, password: hashedPassword, role: userRole };
-      if (farmLocation && farmLocation.trim()) userData.farmLocation = farmLocation.trim();
-      if (cropTypes && cropTypes.trim()) userData.cropTypes = cropTypes.trim();
-
-      const user = new User(userData);
+      const user = new User({
+        name,
+        email,
+        password: hashedPassword,
+        role: role || 'customer'
+      });
       await user.save();
 
+      if (role === 'farmer') {
+        const existingFarmer = await Farmer.findOne({ aadhaarNumber: farmerData.aadhaarNumber });
+        if (existingFarmer) {
+          await User.deleteOne({ _id: user._id }); // Rollback user creation
+          return res.status(400).json({ message: 'Aadhaar number already registered' });
+        }
+
+        const farmer = new Farmer({
+          userId: user._id,
+          aadhaarNumber: farmerData.aadhaarNumber,
+          address: farmerData.address,
+          state: farmerData.state,
+          district: farmerData.district,
+          villageMandal: farmerData.villageMandal,
+          pincode: farmerData.pincode,
+          landSize: farmerData.landSize ? parseFloat(farmerData.landSize) : null,
+          cropsGrown: farmerData.cropsGrown,
+          irrigationAvailable: farmerData.irrigationAvailable,
+          ownTransport: farmerData.ownTransport,
+          upiId: farmerData.upiId,
+          landProofDocument: farmerData.landProofDocument,
+          latitude: farmerData.latitude ? parseFloat(farmerData.latitude) : null,
+          longitude: farmerData.longitude ? parseFloat(farmerData.longitude) : null,
+          status: 'pending'
+        });
+        await farmer.save();
+      }
+
       const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
+        expiresIn: '1h'
       });
 
       res.status(201).json({ token, role: user.role, message: 'Registration successful' });
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
-  },
+  }
 ];
 
 exports.login = [
@@ -70,84 +115,41 @@ exports.login = [
       }
 
       const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
+        expiresIn: '1h'
       });
+
+      let farmerData = null;
+      if (user.role === 'farmer') {
+        farmerData = await Farmer.findOne({ userId: user._id });
+      }
 
       res.json({
         token,
-        user: {
-          _id: user._id,
-          name: user.name,
-          role: user.role,
-        },
+        role: user.role,
         message: 'Login successful',
+        farmerStatus: farmerData ? farmerData.status : null
       });
     } catch (error) {
       res.status(500).json({ message: 'Server error' });
     }
-  },
+  }
 ];
 
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-exports.getUserBasicDetails = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('_id name');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json({ _id: user._id, name: user.name });
+    let farmerData = null;
+    if (user.role === 'farmer') {
+      farmerData = await Farmer.findOne({ userId: user._id });
+    }
+    res.json({
+      ...user.toObject(),
+      farmerStatus: farmerData ? farmerData.status : null
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-exports.postCrop = [
-  body('cropName').notEmpty().withMessage('Crop name is required'),
-  body('quantity').isNumeric().withMessage('Quantity must be a number').custom((value) => value >= 0).withMessage('Quantity must be non-negative'),
-  body('price').isNumeric().withMessage('Price must be a number').custom((value) => value >= 0).withMessage('Price must be non-negative'),
-  body('imageUrl').notEmpty().withMessage('Image URL is required'),
-  body('type').isIn(['vegetables', 'fruits']).withMessage('Type must be "vegetables" or "fruits"'),
-  body('farmerId').notEmpty().withMessage('Farmer ID is required'),
-
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { cropName, quantity, price, imageUrl, type, farmerId } = req.body;
-
-    try {
-      // Validate farmerId
-      const farmer = await User.findById(farmerId);
-      if (!farmer || farmer.role !== 'Farmer') {
-        return res.status(400).json({ message: 'Invalid or non-farmer ID' });
-      }
-
-      // Create new crop entry
-      const crop = new Crop({
-        cropName,
-        quantity,
-        farmerName: farmer.name,
-        price,
-        imageUrl,
-        type,
-        farmerId
-      });
-
-      await crop.save();
-      res.status(201).json({ message: 'Crop posted successfully', crop });
-    } catch (err) {
-      console.error('Error posting crop:', err);
-      res.status(500).json({ message: 'Server error' });
-    }
-  },
-];
