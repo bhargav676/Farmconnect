@@ -2,7 +2,6 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from './context/AuthContext';
 
-
 const RegisterFarmer = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -24,6 +23,7 @@ const RegisterFarmer = () => {
     longitude: ''
   });
   const [error, setError] = useState('');
+  const [geoLoading, setGeoLoading] = useState(false); // State for geolocation loading
   const { register, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -40,6 +40,49 @@ const RegisterFarmer = () => {
     if (file) {
       setFormData(prev => ({ ...prev, landProofDocument: `cloudinary://mock-url/${file.name}` }));
     }
+  };
+
+  // Handle geolocation fetch
+  const handleFetchLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setGeoLoading(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData(prev => ({
+          ...prev,
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6)
+        }));
+        setGeoLoading(false);
+      },
+      (err) => {
+        setGeoLoading(false);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            setError('Location access denied. Please allow location access to use this feature.');
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setError('Location information is unavailable.');
+            break;
+          case err.TIMEOUT:
+            setError('The request to get your location timed out.');
+            break;
+          default:
+            setError('An error occurred while fetching your location.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   };
 
   const handleRegister = async (e) => {
@@ -471,7 +514,7 @@ const RegisterFarmer = () => {
                     onChange={handleChange}
                     className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="e.g., 12.345"
-                    disabled={loading}
+                    disabled={loading || geoLoading}
                   />
                 </div>
               </div>
@@ -491,17 +534,38 @@ const RegisterFarmer = () => {
                     onChange={handleChange}
                     className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="e.g., 78.901"
-                    disabled={loading}
+                    disabled={loading || geoLoading}
                   />
                 </div>
               </div>
+            </div>
+            
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleFetchLocation}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg"
+                disabled={loading || geoLoading}
+              >
+                {geoLoading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Fetching Location...
+                  </>
+                ) : (
+                  'Fetch My Location'
+                )}
+              </button>
             </div>
           </div>
           
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-3 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg mt-4"
-            disabled={loading}
+            disabled={loading || geoLoading}
           >
             {loading ? (
               <>
