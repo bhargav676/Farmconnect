@@ -66,7 +66,7 @@ function App() {
         setItems([]);
       })
       .finally(() => {
-        // Simulate a slightly longer load time to showcase skeleton
+
         setTimeout(() => setLoading(false), 500);
       });
   }, []);
