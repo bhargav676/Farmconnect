@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/auth');
 const nearbyCropController = require('../controllers/nearbyCropController')
 
 router.post('/crop', authMiddleware(), cropController.postCrop);
-router.get('/nearby-crops',nearbyCropController.getNearbyCrops);
+router.post('/nearby-crops',nearbyCropController.getNearbyCrops);
 
 
 module.exports = router;   

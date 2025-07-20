@@ -1,10 +1,10 @@
-// const express = require('express');
-// const router = express.Router();
-// const purchaseController = require('../controllers/purchaseController');
-// const authMiddleware = require('../middleware/auth');
+// routes/purchase.js
+const express = require('express');
+const router = express.Router();
+const purchaseController = require('../controllers/purchaseController');
+const authMiddleware = require('../middleware/auth');
 
-// // Customer-only routes
-// router.post('/purchase', authMiddleware(['Customer']), purchaseController.createPurchase);
-// router.get('/purchases', authMiddleware(['Customer']), purchaseController.getPurchaseHistory);
+router.post('/', authMiddleware(['customer']), purchaseController.postPurchase);
+router.get('/', authMiddleware(['customer']), purchaseController.getPurchases);
 
-// module.exports = router;
+module.exports = router;
