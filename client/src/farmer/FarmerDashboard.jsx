@@ -18,8 +18,6 @@ const FarmerDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-
-  // Get token from localStorage
   const token = localStorage.getItem('token');
 
   // Debug token and user
@@ -34,7 +32,6 @@ const FarmerDashboard = () => {
       if (!token) {
         console.error('No token available, redirecting to login');
         setError('Please log in to continue');
-        logout();
         navigate('/login');
         return;
       }
@@ -44,22 +41,26 @@ const FarmerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log('Fetched user data:', res.data);
-        setUser(res.data);
+        setUser({
+          _id: res.data._id,
+          email: res.data.email,
+          name: res.data.name,
+          role: res.data.role.toLowerCase(),
+        });
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch user:', err.response?.data || err.message);
         setError('Failed to load user data. Please log in again.');
-        logout();
         navigate('/login');
       }
     };
 
-    if (!user) {
+    if (!user || !user._id) {
       fetchUser();
     } else {
       setLoading(false);
     }
-  }, [user, setUser, navigate, logout, token]);
+  }, [user, setUser, navigate, token]);
 
   // Fetch crop list from api.json
   useEffect(() => {
@@ -75,6 +76,7 @@ const FarmerDashboard = () => {
       } catch (err) {
         console.error('Failed to fetch crop list:', err.message);
         setError('Failed to load crop list');
+        toast.error('Failed to load crop list');
       }
     };
     fetchCropList();
@@ -106,16 +108,24 @@ const FarmerDashboard = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.cropName || !formData.quantity || !formData.price || !formData.imageUrl || !formData.type || !user?._id) {
+    // Check if user is a farmer
+    if (!user || user.role !== 'farmer') {
+      setError('Only farmers can post crops. Please log in with a farmer account.');
+      toast.error('Only farmers can post crops.');
+      return;
+    }
+
+    // Validate form fields
+    if (!formData.cropName || !formData.quantity || !formData.price || !formData.imageUrl || !formData.type || !user._id) {
       setError('All fields are required');
       toast.error('All fields are required');
       return;
     }
 
+    // Validate token
     if (!token) {
       setError('Authentication token missing. Please log in again.');
       toast.error('Authentication token missing. Please log in again.');
-      logout();
       navigate('/login');
       return;
     }
@@ -133,15 +143,13 @@ const FarmerDashboard = () => {
       setFormData({ cropName: '', quantity: '', price: '', imageUrl: '', type: '' });
     } catch (err) {
       console.error('Error posting crop:', err.response?.data || err.message);
+      const message = err.response?.data?.message || 'Failed to post crop';
+      setError(message);
+      toast.error(message);
       if (err.response?.status === 401) {
         setError('Session expired or invalid token. Please log in again.');
         toast.error('Session expired. Please log in again.');
-        logout();
         navigate('/login');
-      } else {
-        const message = err.response?.data?.message || 'Failed to post crop';
-        setError(message);
-        toast.error(message);
       }
     }
   };
@@ -153,10 +161,11 @@ const FarmerDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h2 className="text-3xl font-bold text-center mb-6">Farmer Dashboard</h2>
-      <p className="text-center mb-4">Welcome, {user?.name}! Manage your farm products here.</p>
+      <p className="text-center mb-4">Welcome, {user?.name || 'Farmer'}! Manage your farm products here.</p>
 
       <div className="mt-6 text-center bg-white p-4 rounded shadow-md">
-        <p>User ID: {user?._id}</p>
+        <p>User ID: {user?._id || 'Not available'}</p>
+        <p>Role: {user?.role || 'Not available'}</p>
       </div>
 
       {/* Crop Posting Form */}
@@ -164,6 +173,9 @@ const FarmerDashboard = () => {
         <h3 className="text-xl font-semibold mb-4">Post a Crop</h3>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         {success && <p className="text-green-500 mb-4">{success}</p>}
+        {user?.role !== 'farmer' && (
+          <p className="text-red-500 mb-4">Only farmers can post crops.</p>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Select Crop</label>
@@ -172,6 +184,7 @@ const FarmerDashboard = () => {
               value={formData.cropName}
               onChange={handleCropSelect}
               className="w-full p-2 border rounded"
+              disabled={user?.role !== 'farmer'}
             >
               <option value="">Select a crop</option>
               {cropList.map((crop) => (
@@ -191,6 +204,7 @@ const FarmerDashboard = () => {
               className="w-full p-2 border rounded"
               placeholder="Enter quantity"
               min="0"
+              disabled={user?.role !== 'farmer'}
             />
           </div>
           <div className="mb-4">
@@ -204,11 +218,13 @@ const FarmerDashboard = () => {
               placeholder="Enter price"
               min="0"
               step="0.01"
+              disabled={user?.role !== 'farmer'}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
+            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 disabled:bg-gray-400"
+            disabled={user?.role !== 'farmer'}
           >
             Post Crop
           </button>
