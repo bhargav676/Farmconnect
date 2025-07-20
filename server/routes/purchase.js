@@ -1,8 +1,10 @@
+// routes/purchase.js
 const express = require('express');
 const router = express.Router();
-const { getFarmerDetailsAndPurchases } = require('../controllers/getFarmerCrops');
+const purchaseController = require('../controllers/purchaseController');
+const authMiddleware = require('../middleware/auth');
 
-// Route to get farmer details and purchased crops
-router.get('/farmer/:farmerId', getFarmerDetailsAndPurchases);
+router.post('/', authMiddleware(['customer']), purchaseController.postPurchase);
+router.get('/', authMiddleware(['customer']), purchaseController.getPurchases);
 
 module.exports = router;
