@@ -2,20 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const Farmer = require('../models/Farmer'); // Import the Farmer model
 const Crop = require('../models/Crop');
-
-
-exports.getUserBasicDetails = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('_id name');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.json({ _id: user._id, name: user.name });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-};
 
 exports.postCrop = [
   body('cropName').notEmpty().withMessage('Crop name is required'),
@@ -34,21 +22,44 @@ exports.postCrop = [
     const { cropName, quantity, price, imageUrl, type, farmerId } = req.body;
 
     try {
-      // Validate farmerId
-      const farmer = await User.findById(farmerId);
-      if (!farmer || farmer.role !== 'farmer') {
+      // Validate farmerId in User collection
+      const user = await User.findById(farmerId);
+      if (!user || user.role !== 'farmer') {
         return res.status(400).json({ message: 'Invalid or non-farmer ID' });
       }
 
-      // Create new crop entry
+      // Fetch farmer details from Farmer collection
+      const farmer = await Farmer.findOne({ userId: farmerId });
+      if (!farmer) {
+        return res.status(400).json({ message: 'Farmer details not found' });
+      }
+
+      // Create new crop entry with farmerDetails
       const crop = new Crop({
         cropName,
         quantity,
-        farmerName: farmer.name,
+        farmerName: user.name, 
         price,
         imageUrl,
         type,
-        farmerId
+        farmerId,
+        farmerDetails: {
+          aadhaarNumber: farmer.aadhaarNumber,
+          address: farmer.address,
+          state: farmer.state,
+          district: farmer.district,
+          villageMandal: farmer.villageMandal,
+          pincode: farmer.pincode,
+          landSize: farmer.landSize,
+          cropsGrown: farmer.cropsGrown,
+          irrigationAvailable: farmer.irrigationAvailable,
+          ownTransport: farmer.ownTransport,
+          upiId: farmer.upiId,
+          landProofDocument: farmer.landProofDocument,
+          status: farmer.status,
+          latitude: farmer.latitude,
+          longitude: farmer.longitude,
+        },
       });
 
       await crop.save();

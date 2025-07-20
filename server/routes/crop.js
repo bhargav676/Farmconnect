@@ -3,7 +3,6 @@ const router = express.Router();
 const cropController = require('../controllers/cropController');
 const authMiddleware = require('../middleware/auth');
 
-router.get('/user/basic', authMiddleware(),cropController.getUserBasicDetails);
 router.post('/crop', authMiddleware(), cropController.postCrop);
 
-module.exports = router;
+module.exports = router;   
