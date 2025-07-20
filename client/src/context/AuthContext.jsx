@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -8,7 +7,6 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -48,14 +46,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password, role = 'Customer') => {
+  const register = async (name, email, password, role = 'Customer', additionalFields = {}) => {
     try {
       setLoading(true);
+      console.log('Register request payload:', { name, email, password, role, ...additionalFields }); // Debug log
       const response = await axios.post('http://localhost:5000/api/auth/register', {
         name,
         email,
         password,
         role,
+        ...additionalFields, // Spread additional fields (e.g., farmLocation, cropTypes)
       });
       localStorage.setItem('token', response.data.token);
       setUser({ email, role: response.data.role });
@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
+      console.error('Registration error:', error.response?.data); // Debug error
       toast.error(message);
       throw error;
     } finally {
@@ -74,7 +75,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
     toast.info('Logged out successfully');
-    navigate('/');
   };
 
   return (

@@ -5,6 +5,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['Admin', 'Farmer', 'Customer'], required: true, default: 'Customer' },
+  farmLocation: { type: String },
+  cropTypes: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
