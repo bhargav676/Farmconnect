@@ -21,7 +21,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/register-farmer" element={<RegisterFarmer />} />
             <Route
-              path="/admin/dashboard"
+              path="/admin/dashboard/*" // It's good practice to add /* here too if AdminDashboard has nested routes
               element={
                 <PrivateRoute roles={["admin"]}>
                   <AdminDashboard />
@@ -29,7 +29,7 @@ function App() {
               }
             />
             <Route
-              path="/farmer/dashboard"
+              path="/farmer/dashboard/*" // <-- The fix is here
               element={
                 <PrivateRoute roles={["farmer"]} requireApproved={true}>
                   <FarmerDashboard />
@@ -37,7 +37,7 @@ function App() {
               }
             />
             <Route
-              path="/customer/dashboard"
+              path="/customer/dashboard/*" // It's good practice to add /* here too if CustomerDashboard has nested routes
               element={
                 <PrivateRoute roles={["customer"]}>
                   <CustomerDashboard />
