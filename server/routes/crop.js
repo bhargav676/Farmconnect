@@ -6,7 +6,18 @@ const authMiddleware = require('../middleware/auth');
 const nearbyCropController = require('../controllers/nearbyCropController')
 
 router.post('/crop', authMiddleware(), cropController.postCrop);
-router.get('/nearby-crops',nearbyCropController.getNearbyCrops);
+router.post('/nearby-crops',nearbyCropController.getNearbyCrops);
+router.get('/cropdata', authMiddleware(), cropController.getFarmerCrops);
+router.put(
+  '/:cropId',
+  [
+    authMiddleware(),
+    body('quantity', 'Quantity is required and must be a positive number').isNumeric().toFloat().custom((value) => value > 0),
+    body('price', 'Price is required and must be a positive number').isNumeric().toFloat().custom((value) => value > 0),
+  ],
+  cropController.updateCrop
+);
+router.delete('/:cropId', authMiddleware(), cropController.deleteCrop);
 
 
 module.exports = router;   
