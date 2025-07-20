@@ -1,10 +1,8 @@
-// const express = require('express');
-// const router = express.Router();
-// const purchaseController = require('../controllers/purchaseController');
-// const authMiddleware = require('../middleware/auth');
+const express = require('express');
+const router = express.Router();
+const { getFarmerDetailsAndPurchases } = require('../controllers/getFarmerCrops');
 
-// // Customer-only routes
-// router.post('/purchase', authMiddleware(['Customer']), purchaseController.createPurchase);
-// router.get('/purchases', authMiddleware(['Customer']), purchaseController.getPurchaseHistory);
+// Route to get farmer details and purchased crops
+router.get('/farmer/:farmerId', getFarmerDetailsAndPurchases);
 
-// module.exports = router;
+module.exports = router;

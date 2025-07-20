@@ -36,14 +36,20 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo / Brand Name */}
           <div className="flex-shrink-0">
+
             <NavLink to="/farmer/dashboard" className="flex items-center space-x-2 text-white">
               <FiGrid size={22} className="text-teal-400" />
               <span className="text-lg font-bold">Farmer Dashboard</span>
             </NavLink>
           </div>
+         
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex md:items-center md:space-x-4">
+              <NavLink to="/farmer/dashboard/" className={getNavLinkClass}>
+              <FiEdit className="mr-2" />
+              dashboard
+            </NavLink>
             <NavLink to="/farmer/dashboard/upload" className={getNavLinkClass}>
               <FiUploadCloud className="mr-2" />
               Upload Crop
