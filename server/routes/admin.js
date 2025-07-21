@@ -11,7 +11,7 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/users', auth(), getAllUsers);
+router.get('/users', auth(), getAllUsers); 
 router.get('/farmers', auth(), getAllFarmers);
 router.get('/farmer/:id', auth(), getFarmerById);
 router.post('/farmer/:id/approve', auth(), approveFarmer);

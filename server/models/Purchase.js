@@ -6,6 +6,10 @@ const purchaseSchema = new mongoose.Schema({
   farmerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   cropId: { type: mongoose.Schema.Types.ObjectId, required: true },
   cropName: { type: String, required: true },
+   image: {
+    type: String,
+    required: true,
+  },
   quantity: { type: Number, required: true, min: 1 },
   unit: { type: String, required: true, enum: ['kg', 'dozen', 'unit'] },
   totalPrice: { type: Number, required: true, min: 0 },

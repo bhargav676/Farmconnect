@@ -1,4 +1,4 @@
-// components/CustomerDashboard.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
@@ -265,7 +265,11 @@ const CustomerDashboard = () => {
                                   </span>
                                 </div>
                                 <p className="text-sm text-gray-500">
-                                  Available: {crop.quantity} {crop.unit}
+                                  {Number(crop.quantity) === 0 ? (
+                                    <span className="text-red-600 font-medium">Out of Stock</span>
+                                  ) : (
+                                    `Available: ${crop.quantity} ${crop.unit}`
+                                  )}
                                 </p>
                                 <div className="mt-2 flex items-center justify-between">
                                   <span className="text-lg font-bold text-green-600">₹{crop.price}</span>
@@ -278,10 +282,11 @@ const CustomerDashboard = () => {
                                       onChange={(e) => handleQuantityChange(crop._id, e.target.value)}
                                       placeholder="Qty"
                                       className="w-16 p-1 border border-gray-300 rounded-md text-center focus:ring-green-500 focus:border-green-500"
+                                      disabled={Number(crop.quantity) === 0}
                                     />
                                     <button
                                       onClick={() => handlePurchase(crop._id, farmer.farmerId, crop.quantity)}
-                                      disabled={!quantityInputs[crop._id] || quantityInputs[crop._id] <= 0}
+                                      disabled={Number(crop.quantity) === 0 || !quantityInputs[crop._id] || quantityInputs[crop._id] <= 0}
                                       className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       Buy
@@ -392,7 +397,7 @@ const CustomerDashboard = () => {
       {/* Footer */}
       <footer className="mt-12 border-t border-gray-200 pt-8">
         <p className="text-center text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} FarmDirect. All rights reserved.
+          © {new Date().getFullYear()} FarmDirect. All rights reserved.
         </p>
       </footer>
     </div>

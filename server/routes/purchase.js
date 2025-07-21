@@ -8,5 +8,6 @@ const authMiddleware = require('../middleware/auth');
 router.post('/', authMiddleware(['customer']), purchaseController.postPurchase);
 router.get('/', authMiddleware(['customer']), purchaseController.getPurchases);
 router.get('/farmer/:farmerId', getFarmer.getFarmerPurchases);
+router.patch('/:purchaseId/status', getFarmer.updatePurchaseStatus);
 
 module.exports = router;
