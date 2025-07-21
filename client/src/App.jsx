@@ -10,6 +10,7 @@ import ApprovalWaiting from "./admin/ApprovalWaiting";
 import Rejected from "./admin/Rejected";
 import PrivateRoute from "./PrivateRoute";
 import ErrorBoundary from "./ErrorBoundary";
+import CartPage from './customer/CartPage';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/cart" element={<CartPage />} />
             <Route
               path="/farmer/approval-waiting"
               element={
