@@ -5,7 +5,10 @@ import AuthContext from './context/AuthContext';
 const PrivateRoute = ({ children, roles }) => {
   const { user, loading } = useContext(AuthContext);
 
+  console.log('PrivateRoute - user:', user, 'loading:', loading, 'required roles:', roles); // Debug log
+
   if (loading) {
+    console.log('PrivateRoute - Still loading'); // Debug log
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <svg className="animate-spin h-8 w-8 text-green-500" viewBox="0 0 24 24">
@@ -17,9 +20,11 @@ const PrivateRoute = ({ children, roles }) => {
   }
 
   if (!user || (roles && !roles.includes(user.role))) {
+    console.log('PrivateRoute - Access denied, redirecting to login'); // Debug log
     return <Navigate to="/" />;
   }
 
+  console.log('PrivateRoute - Access granted'); // Debug log
   return children;
 };
 
