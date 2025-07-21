@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const farmerSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  aadhaarNumber: { type: String, required: true, unique: true, match: /^\d{12}$/ },
+  aadhaarNumber: { type: String, required: true, unique: true, match: /^\d{12}$/ }, 
   address: { type: String, required: true },
   state: { type: String, required: true },
   district: { type: String, required: true },

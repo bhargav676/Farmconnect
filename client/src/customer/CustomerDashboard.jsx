@@ -1,10 +1,9 @@
 // components/CustomerDashboard.js
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { ClipLoader } from "react-spinners";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { ClipLoader } from 'react-spinners';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CustomerDashboard = () => {
   const [location, setLocation] = useState({ latitude: null, longitude: null });
@@ -476,30 +475,51 @@ const CustomerDashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-6 flex items-center justify-between">
-                        <input
-                          type="number"
-                          min="1"
-                          max={crop.quantity}
-                          value={quantityInputs[crop._id] || ""}
-                          onChange={(e) =>
-                            handleQuantityChange(crop._id, e.target.value)
-                          }
-                          placeholder="Quantity"
-                          className="w-24 p-2 border border-emerald-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50"
-                          disabled={crop.quantity === 0} // Disable input if out of stock
-                        />
-                        <button
-                          onClick={() => handleAddToCart(crop)}
-                          disabled={
-                            !quantityInputs[crop._id] ||
-                            quantityInputs[crop._id] <= 0 ||
-                            crop.quantity === 0
-                          }
-                          className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                        >
-                          Add to Cart
-                        </button>
+                      
+                      <div className="space-y-4">
+                        {farmer.crops.map((crop) => (
+                          <div key={crop._id} className="border-t border-gray-100 pt-4">
+                            <div className="flex">
+                              <img
+                                src={crop.image || 'https://via.placeholder.com/100'}
+                                alt={crop.name}
+                                className="h-20 w-20 rounded-md object-cover"
+                              />
+                              <div className="ml-4 flex-1">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-lg font-medium text-gray-900">{crop.name}</h4>
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    {crop.distance} km
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                  Available: {crop.quantity} {crop.unit}
+                                </p>
+                                <div className="mt-2 flex items-center justify-between">
+                                  <span className="text-lg font-bold text-green-600">₹{crop.price}</span>
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={crop.quantity}
+                                      value={quantityInputs[crop._id] || ''}
+                                      onChange={(e) => handleQuantityChange(crop._id, e.target.value)}
+                                      placeholder="Qty"
+                                      className="w-16 p-1 border border-gray-300 rounded-md text-center focus:ring-green-500 focus:border-green-500"
+                                    />
+                                    <button
+                                      onClick={() => handlePurchase(crop._id, farmer.farmerId, crop.quantity)}
+                                      disabled={!quantityInputs[crop._id] || quantityInputs[crop._id] <= 0}
+                                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      Buy
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

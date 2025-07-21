@@ -48,6 +48,7 @@ exports.postPurchase = [
         farmerId,
         cropId,
         cropName: crop.name,
+        image:crop.image,
         quantity,
         unit: crop.unit,
         totalPrice,

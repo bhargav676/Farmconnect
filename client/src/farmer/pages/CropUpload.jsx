@@ -187,7 +187,7 @@ const CropUpload = () => {
     try {
       console.log('Sending POST request with payload:', { ...formData, farmerId: user._id });
       const res = await axios.post(
-        'http://localhost:5000/api/auth/crop',
+        'http://localhost:5000/api/crops/crop',
         { ...formData, farmerId: user._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );

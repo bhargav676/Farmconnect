@@ -13,9 +13,18 @@ const Login = () => {
     e.preventDefault();
     setError("");
     try {
-      const { role, farmerStatus } = await login(email, password);
+      const result = await login(email, password);
       console.log(
-        "Login successful, role:",
+        "Login successful, full result:",
+        result
+      ); // Debug log
+      
+      // Extract role from the correct location
+      const role = result.user?.role || result.role;
+      const farmerStatus = result.farmerStatus;
+      
+      console.log(
+        "Extracted role:",
         role,
         "farmerStatus:",
         farmerStatus
