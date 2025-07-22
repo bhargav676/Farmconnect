@@ -8,13 +8,13 @@ const cropRoutes=require('./routes/crop');
 const purchaseRoutes=require('./routes/purchase');
 require('dotenv').config();
 
-const app = express();
+const app = express(); 
 
 // Connect to MongoDB
 connectDB();
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors());
 app.use(express.json());
 
 // Routes
