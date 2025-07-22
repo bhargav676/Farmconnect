@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+// --- CHANGE: Added 'Link' from react-router-dom ---
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { ToastContainer, toast } from 'react-toastify';
@@ -37,7 +38,6 @@ const CustomerDashboard = () => {
   const [activeTab, setActiveTab] = useState('nearby');
   const [cartCount, setCartCount] = useState(0);
   const [maxDistance, setMaxDistance] = useState(50);
-  // *** NEW STATE: To track quantities of items in the cart ***
   const [cartQuantities, setCartQuantities] = useState({});
 
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({});
@@ -46,7 +46,6 @@ const CustomerDashboard = () => {
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
-  // *** NEW FUNCTION: To read localStorage and update our cart state ***
   const syncCartState = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const quantities = cart.reduce((acc, item) => {
@@ -68,14 +67,13 @@ const CustomerDashboard = () => {
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
     fetchPurchases();
-    syncCartState(); // Sync cart state on initial load
+    syncCartState();
     const storedLocation = JSON.parse(localStorage.getItem('location') || '{}');
     if (storedLocation.latitude && storedLocation.longitude) {
       setLocation(storedLocation);
       fetchNearbyCrops(storedLocation.latitude, storedLocation.longitude);
     } else { fetchLocation(); }
     const handleStorageChange = () => {
-      // When storage changes (e.g., in another tab), re-sync the cart state
       syncCartState();
     };
     window.addEventListener('storage', handleStorageChange);
@@ -128,39 +126,39 @@ const CustomerDashboard = () => {
     setQuantityInputs((prev) => ({ ...prev, [cropId]: value }));
   };
 
-    const handleAddToCart = async (crop) => {
+  const handleAddToCart = async (crop) => {
     const quantity = parseInt(quantityInputs[crop._id] || 0);
     if (quantity <= 0) { toast.warn(`Please enter a valid quantity.`); return; }
-    
+
     const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = existingCart.find(item => item.cropId === crop._id);
-    
     const currentCropState = flattenedCrops.find(c => c._id === crop._id);
     const availableStock = currentCropState ? currentCropState.quantity : crop.quantity;
     
     if (quantity > availableStock) { toast.error(`Cannot add to cart. Only ${availableStock} available.`); return; }
 
     try {
-      setCrops((prevCrops) => prevCrops.map((farmer) => ({ ...farmer, crops: farmer.crops.map((c) => c._id === crop._id ? { ...c, quantity: c.quantity - quantity } : c ), })) );
-      await updateCropQuantity(crop._id, availableStock - quantity);
       let updatedCart;
+      const existingItem = existingCart.find(item => item.cropId === crop._id);
       if (existingItem) {
-        updatedCart = existingCart.map(item => item.cropId === crop._id ? { ...item, quantity: item.quantity + quantity, total: item.price * (item.quantity + quantity), originalQuantity: crop.quantity, } : item );
+        updatedCart = existingCart.map(item => item.cropId === crop._id ? { ...item, quantity: item.quantity + quantity, total: item.price * (item.quantity + quantity) } : item );
       } else {
-        const newCartItem = { cropId: crop._id, farmerId: crop.farmerInfo.id, cropName: crop.name, unit: crop.unit, quantity, originalQuantity: crop.quantity, price: crop.price, total: crop.price * quantity, farmerName: crop.farmerInfo.name, village: crop.farmerInfo.village, district: crop.farmerInfo.district, image: crop.image, };
+        const newCartItem = { cropId: crop._id, farmerId: crop.farmerInfo.id, cropName: crop.name, unit: crop.unit, quantity, price: crop.price, total: crop.price * quantity, farmerName: crop.farmerInfo.name, village: crop.farmerInfo.village, district: crop.farmerInfo.district, image: crop.image, };
         updatedCart = [...existingCart, newCartItem];
       }
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       
-      syncCartState(); // *** UPDATE: Re-sync the state to show the badge immediately ***
+      syncCartState();
       setQuantityInputs((prev) => ({ ...prev, [crop._id]: '' }));
       toast.success(`${crop.name} added to cart!`, { icon: '🛒' });
       
-    } catch (err) { fetchNearbyCrops(location.latitude, location.longitude); toast.error(err.message); }
+    } catch (err) {
+      fetchNearbyCrops(location.latitude, location.longitude);
+      toast.error(err.message);
+    }
   };
 
   return (
-    <div className="bg-gray-50 bg-gradient-to-br from-emerald-50/50 via-white to-sky-50/50 font-sans min-h-screen">
+    <div className="min-h-screen bg-gray-50 bg-gradient-to-br from-emerald-50/50 via-white to-sky-50/50 font-sans">
       <style>{animationStyles}</style>
       <ToastContainer position="bottom-right" theme="colored" />
       <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-40 shadow-sm border-b border-gray-200/80">
@@ -193,7 +191,8 @@ const CustomerDashboard = () => {
                     {!isLoadingCrops && flattenedCrops.length === 0 && <div className="text-center py-20 bg-white rounded-2xl shadow-sm"><h3 className="text-xl font-semibold text-gray-700">No Fields to Show</h3><p className="mt-2 text-gray-500">No crops were found in your selected area. Try expanding your search radius.</p></div>}
                     {!isLoadingCrops && flattenedCrops.length > 0 && (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {flattenedCrops.map((crop, index) => (
-                            <div key={`${crop._id}-${crop.farmerInfo.id}`} className="bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl animate-fadeInUp" style={{ animationDelay: `${index * 75}ms` }}>
+                            // --- CHANGE: Wrapped the entire card div in a Link component ---
+                            <Link to={`/crop/${crop._id}`} key={`${crop._id}-${crop.farmerInfo.id}`} className="block bg-white rounded-2xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl animate-fadeInUp flex-col" style={{ animationDelay: `${index * 75}ms` }}>
                                 <div className="relative">
                                     <img src={crop.image || 'https://via.placeholder.com/400'} alt={crop.name} className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-110"/>
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
@@ -203,7 +202,6 @@ const CustomerDashboard = () => {
                                 <div className="p-5 flex flex-col flex-grow">
                                     <div className="flex items-baseline justify-between mb-4"><p className="text-3xl font-extrabold text-emerald-500">₹{crop.price}<span className="text-sm font-medium text-gray-500">/{crop.unit}</span></p><p className={`text-sm font-bold ${crop.quantity > 0 ? 'text-gray-600' : 'text-red-500'}`}>{crop.quantity > 0 ? `Stock: ${crop.quantity}` : 'Out of Stock'}</p></div>
                                     <div className="mt-auto flex flex-col gap-3">
-                                        {/* *** NEW UI ELEMENT: Visual Feedback Badge *** */}
                                         {(cartQuantities[crop._id] || 0) > 0 && (
                                             <div className="flex items-center justify-center text-xs font-bold text-teal-800 bg-teal-100 rounded-full px-3 py-1.5">
                                               <CheckmarkIcon />
@@ -211,12 +209,31 @@ const CustomerDashboard = () => {
                                             </div>
                                         )}
                                         <div className="flex items-center gap-3">
-                                          <input type="number" min="1" max={crop.quantity} value={quantityInputs[crop._id] || ''} onChange={(e) => handleQuantityChange(crop._id, e.target.value)} placeholder="Qty" className="w-24 p-2.5 border-2 border-gray-200 rounded-lg text-center font-semibold focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition" disabled={crop.quantity === 0} />
-                                          <button onClick={() => handleAddToCart(crop)} disabled={!quantityInputs[crop._id] || quantityInputs[crop._id] <= 0 || crop.quantity === 0} className="w-full px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-lg hover:from-emerald-600 hover:to-green-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">Add to Cart</button>
+                                          {/* --- CHANGE: Added onClick to stop propagation --- */}
+                                          <input
+                                            type="number"
+                                            min="1" max={crop.quantity}
+                                            value={quantityInputs[crop._id] || ''}
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                            onChange={(e) => { e.preventDefault(); handleQuantityChange(crop._id, e.target.value); }}
+                                            placeholder="Qty"
+                                            className="w-24 p-2.5 border-2 border-gray-200 rounded-lg text-center font-semibold focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition" disabled={crop.quantity === 0}
+                                          />
+                                          {/* --- CHANGE: Added onClick to stop navigation --- */}
+                                          <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleAddToCart(crop);
+                                            }}
+                                            disabled={!quantityInputs[crop._id] || quantityInputs[crop._id] <= 0 || crop.quantity === 0}
+                                            className="w-full px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-lg hover:from-emerald-600 hover:to-green-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">
+                                                Add to Cart
+                                          </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link> // --- CHANGE: Closed the Link tag ---
                         ))}
                     </div>)}
                 </>

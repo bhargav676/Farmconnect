@@ -187,3 +187,49 @@ exports.updateCropQuantity = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.getCropById = async (req, res) => {
+  try {
+    const cropId = req.params.id;
+
+    // Find the parent document that contains the crop sub-document
+    const cropDoc = await Crop.findOne({ 'crops._id': cropId });
+
+    if (!cropDoc) {
+      return res.status(404).json({ message: 'Crop not found.' });
+    }
+
+    // Extract the specific crop from the 'crops' array
+    const singleCrop = cropDoc.crops.id(cropId);
+
+    if (!singleCrop) {
+      return res.status(404).json({ message: 'Crop sub-document not found.' });
+    }
+
+    // Combine data from the sub-document and parent document for the response
+    const response = {
+      _id: singleCrop._id,
+      name: singleCrop.name,
+      quantity: singleCrop.quantity,
+      unit: singleCrop.unit,
+      price: singleCrop.price,
+      image: singleCrop.image,
+      type: singleCrop.type,
+      farmerInfo: {
+        id: cropDoc.farmerId,
+        name: cropDoc.farmerName,
+        village: cropDoc.farmerDetails.villageMandal,
+        district: cropDoc.farmerDetails.district,
+      },
+    };
+
+    res.json(response);
+
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+        return res.status(404).json({ message: 'Crop not found (invalid ID format).' });
+    }
+    res.status(500).send('Server Error');
+  }
+};

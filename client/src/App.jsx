@@ -59,6 +59,8 @@ function App() {
             />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/profile" element={<CustomerProfile />} />
+            <Route path="/crop/:cropId" element={<CropDetailPage />} />
+
             <Route
               path="/farmer/approval-waiting"
               element={

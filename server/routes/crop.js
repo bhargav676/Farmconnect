@@ -19,6 +19,8 @@ router.put(
 );
 router.delete('/:cropId', authMiddleware(), cropController.deleteCrop);
 router.patch('/:cropId', authMiddleware(), cropController.updateCropQuantity);
+router.get('/:id', authMiddleware(), cropController.getCropById);
+
 
 
 module.exports = router;   
