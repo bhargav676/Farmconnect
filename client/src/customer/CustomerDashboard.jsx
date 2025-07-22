@@ -160,7 +160,7 @@ const CustomerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 bg-gradient-to-br from-emerald-50/50 via-white to-sky-50/50 font-sans">
+    <div className="bg-gray-50 bg-gradient-to-br from-emerald-50/50 via-white to-sky-50/50 font-sans min-h-screen">
       <style>{animationStyles}</style>
       <ToastContainer position="bottom-right" theme="colored" />
       <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-40 shadow-sm border-b border-gray-200/80">

@@ -7,7 +7,7 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden; /* Only hide horizontal overflow, allow vertical scroll */
 }
 
 /* Custom scrollbar for better aesthetics */

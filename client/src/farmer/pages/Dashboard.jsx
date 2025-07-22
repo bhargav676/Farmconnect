@@ -113,8 +113,8 @@ const Dashboard = () => {
 
   const onImageError = (e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/150/e2e8f0/94a3b8?text=Image"; };
   
-  if (authLoading || loading) return <div className="min-h-screen bg-[#f5fafa] flex items-center justify-center"><ClipLoader color="#16a34a" size={50} /></div>;
-  if (!user?._id || !token) return <div className="min-h-screen bg-[#f5fafa] flex items-center justify-center"><EmptyState icon={HiOutlineShoppingCart} title="Access Denied" message="Please log in to view your personalized dashboard." actionLink="/login" actionText="Go to Login"/></div>;
+  if (authLoading || loading) return <div className="bg-[#f5fafa] flex items-center justify-center min-h-screen"><ClipLoader color="#16a34a" size={50} /></div>;
+  if (!user?._id || !token) return <div className="bg-[#f5fafa] flex items-center justify-center min-h-screen"><EmptyState icon={HiOutlineShoppingCart} title="Access Denied" message="Please log in to view your personalized dashboard." actionLink="/" actionText="Go to Login"/></div>;
 
   const { farmerInfo, crops, purchases, summary, stats } = dashboardData;
   
@@ -130,7 +130,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5fafa] p-4 sm:p-6 lg:p-8">
+    <div className="bg-[#f5fafa] p-4 sm:p-6 lg:p-8 min-h-screen">
       <div className="max-w-screen-2xl mx-auto">
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
