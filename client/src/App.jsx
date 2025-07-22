@@ -11,6 +11,7 @@ import ApprovalWaiting from "./admin/ApprovalWaiting";
 import Rejected from "./admin/Rejected";
 import PrivateRoute from "./auth/PrivateRoute";
 import ErrorBoundary from "./auth/ErrorBoundary";
+import CartPage from './customer/CartPage';
 
 function App() {
   return (
