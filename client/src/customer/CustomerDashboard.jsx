@@ -141,8 +141,8 @@ const CustomerDashboard = () => {
     if (quantity > availableStock) { toast.error(`Cannot add to cart. Only ${availableStock} available.`); return; }
 
     try {
-      setCrops((prevCrops) => prevCrops.map((farmer) => ({ ...farmer, crops: farmer.crops.map((c) => c._id === crop._id ? { ...c, quantity: c.quantity - quantity } : c ), })) );
-      await updateCropQuantity(crop._id, availableStock - quantity);
+      //setCrops((prevCrops) => prevCrops.map((farmer) => ({ ...farmer, crops: farmer.crops.map((c) => c._id === crop._id ? { ...c, quantity: c.quantity - quantity } : c ), })) );
+      //await updateCropQuantity(crop._id, availableStock - quantity);
       let updatedCart;
       if (existingItem) {
         updatedCart = existingCart.map(item => item.cropId === crop._id ? { ...item, quantity: item.quantity + quantity, total: item.price * (item.quantity + quantity), originalQuantity: crop.quantity, } : item );
@@ -160,7 +160,7 @@ const CustomerDashboard = () => {
   };
 
   return (
-    <div className="bg-gray-50 bg-gradient-to-br from-emerald-50/50 via-white to-sky-50/50 font-sans min-h-screen">
+    <div className="min-h-screen bg-gray-50 bg-gradient-to-br from-emerald-50/50 via-white to-sky-50/50 font-sans">
       <style>{animationStyles}</style>
       <ToastContainer position="bottom-right" theme="colored" />
       <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-40 shadow-sm border-b border-gray-200/80">
