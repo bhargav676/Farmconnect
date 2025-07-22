@@ -1,15 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import Login from "./Login";
-import Register from "./Register";
-import RegisterFarmer from "./RegisterFarmer";
+import Login from "./auth/Login";
+import Register from "./auth/Register";
+import RegisterFarmer from "./auth/RegisterFarmer";
 import AdminDashboard from "./admin/AdminDashboard";
 import FarmerDashboard from "./farmer/FarmerDashboard";
 import CustomerDashboard from "./customer/CustomerDashboard";
 import ApprovalWaiting from "./admin/ApprovalWaiting";
 import Rejected from "./admin/Rejected";
-import PrivateRoute from "./PrivateRoute";
-import ErrorBoundary from "./ErrorBoundary";
+import PrivateRoute from "./auth/PrivateRoute";
+import ErrorBoundary from "./auth/ErrorBoundary";
 
 function App() {
   return (
