@@ -13,6 +13,7 @@ import PrivateRoute from "./auth/PrivateRoute";
 import ErrorBoundary from "./auth/ErrorBoundary";
 import CartPage from "./customer/CartPage";
 import Home from "./customer/HomePage";
+import CropDetailPage from './customer/CropDetailPage';
 import './App.css'; // Assuming you have a CSS file for global styles
 
 function App() {
