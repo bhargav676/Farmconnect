@@ -125,7 +125,7 @@ const CartPage = () => {
             <h2 className="mt-6 text-2xl font-bold text-gray-800">Your cart is currently empty.</h2>
             <p className="mt-2 text-gray-500 max-w-md mx-auto">Looks like you haven't added any fresh produce yet. Explore nearby farms to get started!</p>
             <div className="mt-8">
-              <button onClick={() => navigate('/customer/dashboard')} className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+              <button onClick={() => navigate('/customer')} className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
                 Explore Fresh Crops
               </button>
             </div>

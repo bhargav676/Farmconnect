@@ -132,7 +132,7 @@ const CustomerProfile = () => {
 
                 <div className="relative container mx-auto p-4 md:p-8">
                     <div className="flex justify-end mb-4">
-                        <button onClick={() => navigate('/customer/dashboard')} className="flex items-center text-sm text-white hover:text-cyan-200 font-medium transition-colors">
+                        <button onClick={() => navigate('/customer')} className="flex items-center text-sm text-white hover:text-cyan-200 font-medium transition-colors">
                             <ArrowLeftIcon /> Back to Dashboard
                         </button>
                     </div>

@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 /* Global styles for full-screen layout */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem; /* Account for fixed navbar */
+}
+
 html,
 body,
 #root {

@@ -6,12 +6,14 @@ import RegisterFarmer from "./auth/RegisterFarmer";
 import AdminDashboard from "./admin/AdminDashboard";
 import FarmerDashboard from "./farmer/FarmerDashboard";
 import CustomerDashboard from "./customer/CustomerDashboard";
-import CustomerProfile  from "./customer/CustomerProfile";
+import CustomerProfile from "./customer/CustomerProfile";
 import ApprovalWaiting from "./admin/ApprovalWaiting";
 import Rejected from "./admin/Rejected";
 import PrivateRoute from "./auth/PrivateRoute";
 import ErrorBoundary from "./auth/ErrorBoundary";
-import CartPage from './customer/CartPage';
+import CartPage from "./customer/CartPage";
+import Home from "./customer/HomePage";
+import './App.css'; // Assuming you have a CSS file for global styles
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/register" element={<Register />} />
             <Route path="/register-farmer" element={<RegisterFarmer />} />
             <Route
@@ -43,6 +46,14 @@ function App() {
               element={
                 <PrivateRoute roles={["customer"]}>
                   <CustomerDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customer/*" // It's good practice to add /* here too if CustomerDashboard has nested routes
+              element={
+                <PrivateRoute roles={["customer"]}>
+                  <Home />
                 </PrivateRoute>
               }
             />
