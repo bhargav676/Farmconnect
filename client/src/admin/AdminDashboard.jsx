@@ -15,14 +15,13 @@ import {
   ShoppingCartIcon,
   ArrowLeftOnRectangleIcon,
   ChartBarIcon,
-  BellIcon,
-  ChevronDownIcon,
   CalendarIcon,
   CurrencyRupeeIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   CheckBadgeIcon,
   ClockIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import {
   ClipboardDocumentIcon as ClipboardDocumentSolid,
@@ -37,6 +36,7 @@ const AdminDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
@@ -101,6 +101,20 @@ const AdminDashboard = () => {
     );
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserDropdown && !event.target.closest('.user-dropdown')) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserDropdown]);
+
   if (!user || user.role !== "admin") return null;
 
   const tabs = [
@@ -162,20 +176,20 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50 p-4 md:p-6">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 overflow-hidden">
       {/* Animated Notification */}
       {notification.show && (
         <div
-          className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg text-white font-medium transition-all duration-300 transform ${
+          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl text-white font-medium transition-all duration-500 transform ${
             notification.type === "success" ? "bg-emerald-500" : "bg-rose-500"
           } ${
             notification.show
-              ? "translate-x-0 opacity-100"
-              : "translate-x-full opacity-0"
+              ? "translate-x-0 opacity-100 scale-100"
+              : "translate-x-full opacity-0 scale-95"
           }`}
         >
           <div className="flex items-center">
-            <div className="mr-2">
+            <div className="mr-3">
               {notification.type === "success" ? (
                 <svg
                   className="w-5 h-5"
@@ -211,15 +225,15 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-5 sticky top-0 z-10">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white flex items-center">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 shadow-2xl border-b border-white/20 backdrop-blur-sm relative z-50">
+        <div className="px-6 py-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 mr-4 shadow-xl">
                   <svg
-                    className="w-6 h-6 mr-2"
+                    className="w-8 h-8 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -237,106 +251,118 @@ const AdminDashboard = () => {
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  FarmConnect Admin
-                </h2>
-
-                <div className="md:hidden flex items-center">
-                  <button className="text-white mr-3 relative">
-                    <BellIcon className="w-6 h-6" />
-                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      3
-                    </span>
-                  </button>
-                  <button className="text-white">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16m-7 6h7"
-                      />
-                    </svg>
-                  </button>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-white tracking-tight">
+                    FarmConnect
+                  </h1>
+                  <p className="text-indigo-100 text-sm font-medium">
+                    Administrator Dashboard
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center mt-4 md:mt-0">
-                <div className="hidden md:flex items-center mr-6">
-                  <button className="text-white mr-4 relative">
-                    <BellIcon className="w-6 h-6" />
-                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      3
-                    </span>
-                  </button>
-                  <div className="relative">
-                    <select className="appearance-none bg-teal-700/30 text-teal-100 rounded-lg pl-4 pr-8 py-2 focus:outline-none focus:ring-1 focus:ring-teal-300">
-                      <option>Today</option>
-                      <option>This Week</option>
-                      <option>This Month</option>
-                      <option>This Year</option>
-                    </select>
-                    <ChevronDownIcon className="w-4 h-4 absolute right-3 top-1/2 -mt-2 text-teal-100 pointer-events-none" />
-                  </div>
-                </div>
+              <div className="lg:hidden flex items-center space-x-3">
+                {/* Mobile navigation items removed */}
+              </div>
+            </div>
 
-                <div className="flex items-center bg-teal-700/30 backdrop-blur-sm rounded-full py-1 pl-1 pr-3">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold border-2 border-white/30">
+            <div className="flex items-center mt-4 lg:mt-0 space-x-4">
+              <div className="relative user-dropdown z-[9999]">
+                <button
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  className="flex items-center bg-white/10 backdrop-blur-sm rounded-2xl py-2 pl-2 pr-4 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-200 group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/10 flex items-center justify-center text-white font-bold border border-white/30 shadow-lg">
                     {user.name
                       ? user.name.charAt(0)
                       : user.email.charAt(0).toUpperCase()}
                   </div>
                   <div className="ml-3">
-                    <p className="font-medium text-white text-sm truncate max-w-[120px]">
+                    <p className="font-semibold text-white text-sm truncate max-w-[140px]">
                       {user.name || user.email}
                     </p>
-                    <p className="text-xs text-teal-100">Administrator</p>
+                    <p className="text-xs text-indigo-100 font-medium">
+                      System Administrator
+                    </p>
                   </div>
-                </div>
-                <button
-                  onClick={logout}
-                  className="ml-4 flex items-center px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 hover:shadow-md transition-all duration-200 group"
-                >
-                  <ArrowLeftOnRectangleIcon className="h-5 w-5 mr-1 group-hover:scale-110 transition-transform" />
-                  <span className="hidden md:inline">Logout</span>
+                  <ChevronDownIcon className={`w-5 h-5 ml-2 text-white transition-transform duration-200 ${
+                    showUserDropdown ? 'rotate-180' : ''
+                  }`} />
                 </button>
-              </div>
-            </div>
 
-            {/* Tab Navigation */}
-            <div className="mt-5 flex space-x-1 overflow-x-auto pb-1 scrollbar-hide">
-              {tabs.map((tab) => {
-                const Icon = activeTab === tab.id ? tab.activeIcon : tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                      activeTab === tab.id
-                        ? "bg-white text-cyan-700 shadow-md"
-                        : "text-teal-100 hover:bg-teal-700/50"
-                    }`}
-                  >
-                    <Icon
-                      className={`w-5 h-5 mr-2 ${
-                        activeTab === tab.id ? "text-cyan-600" : "text-teal-200"
-                      }`}
-                    />
-                    {tab.label}
-                  </button>
-                );
-              })}
+                {/* Dropdown Menu */}
+                {showUserDropdown && (
+                  <div className="fixed top-20 right-6 w-56 bg-white/95 backdrop-blur-lg rounded-xl shadow-2xl border border-white/50 py-2 z-[9999] animate-in slide-in-from-top-5 duration-200">
+                    <div className="px-4 py-3 border-b border-gray-200/50">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {user.name || user.email}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {user.email}
+                      </p>
+                    </div>
+                    
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-200 group"
+                      >
+                        <ArrowLeftOnRectangleIcon className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-5 md:p-7 bg-gray-50 min-h-[70vh]">
-            <div className="bg-white rounded-xl shadow-sm p-5 md:p-6">
-              {renderTabContent()}
+          {/* Enhanced Tab Navigation */}
+          <div className="mt-6 flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+            {tabs.map((tab) => {
+              const Icon = activeTab === tab.id ? tab.activeIcon : tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center px-6 py-3 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
+                    activeTab === tab.id
+                      ? "bg-white text-indigo-700 shadow-lg shadow-white/20 border border-white/30"
+                      : "text-indigo-100 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent"
+                  }`}
+                >
+                  <Icon
+                    className={`w-5 h-5 mr-3 ${
+                      activeTab === tab.id
+                        ? "text-indigo-600"
+                        : "text-indigo-200"
+                    }`}
+                  />
+                  {tab.label}
+                  {tab.id === "registrations" && (
+                    <span className="ml-2 px-2 py-0.5 bg-rose-500 text-white text-xs rounded-full">
+                      New
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area - Full Height */}
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto custom-scrollbar bg-gradient-to-br from-gray-50/80 to-white/50 backdrop-blur-sm">
+          <div className="p-6 h-full">
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/50 h-full overflow-hidden">
+              <div className="p-6 h-full overflow-y-auto custom-scrollbar">
+                {renderTabContent()}
+              </div>
             </div>
           </div>
         </div>
@@ -349,20 +375,28 @@ const AdminDashboard = () => {
 const DashboardOverview = ({ data, loading }) => {
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
-        <span className="ml-4 text-gray-600">Loading dashboard...</span>
+      <div className="flex flex-col justify-center items-center h-full min-h-96">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-600 absolute top-0 left-0"></div>
+        </div>
+        <span className="mt-6 text-gray-600 font-medium text-lg">
+          Loading dashboard analytics...
+        </span>
+        <span className="mt-2 text-gray-400 text-sm">
+          Please wait while we fetch your data
+        </span>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="text-center py-12">
-        <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-4">
+      <div className="text-center py-16 h-full flex flex-col justify-center">
+        <div className="mx-auto w-32 h-32 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-6 shadow-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-12 w-12 text-red-600"
+            className="h-16 w-16 text-red-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -370,52 +404,63 @@ const DashboardOverview = ({ data, loading }) => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={1.5}
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
         </div>
-        <h3 className="text-xl font-medium text-gray-700 mb-2">
+        <h3 className="text-2xl font-bold text-gray-800 mb-3">
           Failed to load dashboard data
         </h3>
-        <p className="text-gray-500">
-          Please try again later or contact support
+        <p className="text-gray-500 text-lg max-w-md mx-auto">
+          Unable to retrieve dashboard information. Please try refreshing the
+          page or contact support if the issue persists.
         </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-6 mx-auto px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium"
+        >
+          Refresh Dashboard
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-8 h-full overflow-y-auto custom-scrollbar">
+      {/* Enhanced Stats Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Farmers"
           value={data.totalFarmers}
           icon={UserGroupSolid}
-          iconColor="bg-blue-100 text-blue-600"
+          iconColor="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600"
           trend={12.5}
+          subtitle="Active farmers"
         />
         <StatCard
           title="Total Customers"
           value={data.totalCustomers}
           icon={UserSolid}
-          iconColor="bg-green-100 text-green-600"
+          iconColor="bg-gradient-to-br from-green-100 to-green-200 text-green-600"
           trend={8.3}
+          subtitle="Registered customers"
         />
         <StatCard
           title="Total Crops"
           value={data.totalCrops}
           icon={ShoppingBagSolid}
-          iconColor="bg-amber-100 text-amber-600"
+          iconColor="bg-gradient-to-br from-amber-100 to-amber-200 text-amber-600"
           trend={4.7}
+          subtitle="Listed crops"
         />
         <StatCard
           title="Total Purchases"
           value={data.totalPurchases}
           icon={ShoppingCartSolid}
-          iconColor="bg-purple-100 text-purple-600"
+          iconColor="bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600"
           trend={18.2}
+          subtitle="Completed orders"
         />
       </div>
 
@@ -556,21 +601,49 @@ const DashboardOverview = ({ data, loading }) => {
   );
 };
 
-// Stat Card Component
-const StatCard = ({ title, value, icon: Icon, iconColor, trend }) => {
+// Enhanced Stat Card Component
+const StatCard = ({ title, value, icon: Icon, iconColor, trend, subtitle }) => {
   return (
-    <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group">
       <div className="flex justify-between items-start">
-        <h3 className="font-medium text-gray-700">{title}</h3>
-        <div className={`p-2 rounded-lg ${iconColor}`}>
-          <Icon className="w-5 h-5" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+            {title}
+          </h3>
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+        </div>
+        <div
+          className={`p-3 rounded-xl ${iconColor} shadow-md group-hover:scale-110 transition-transform duration-300`}
+        >
+          <Icon className="w-6 h-6" />
         </div>
       </div>
-      <div className="mt-3 flex items-baseline">
-        <span className="text-2xl font-bold text-gray-900">{value}</span>
-        <span className="ml-2 text-sm font-medium text-green-600 flex items-center">
-          <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />+{trend}%
+      <div className="mt-4 flex items-baseline justify-between">
+        <span className="text-3xl font-bold text-gray-900 tracking-tight">
+          {value.toLocaleString()}
         </span>
+        <div className="flex items-center">
+          <span
+            className={`text-sm font-semibold flex items-center px-2 py-1 rounded-full ${
+              trend > 0
+                ? "text-green-700 bg-green-100"
+                : "text-red-700 bg-red-100"
+            }`}
+          >
+            {trend > 0 ? (
+              <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+            ) : (
+              <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
+            )}
+            {Math.abs(trend)}%
+          </span>
+        </div>
+      </div>
+      <div className="mt-3 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-1000 ease-out"
+          style={{ width: `${Math.min(trend * 2, 100)}%` }}
+        ></div>
       </div>
     </div>
   );
