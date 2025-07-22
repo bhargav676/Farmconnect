@@ -6,6 +6,7 @@ import RegisterFarmer from "./auth/RegisterFarmer";
 import AdminDashboard from "./admin/AdminDashboard";
 import FarmerDashboard from "./farmer/FarmerDashboard";
 import CustomerDashboard from "./customer/CustomerDashboard";
+import CustomerProfile  from "./customer/CustomerProfile";
 import ApprovalWaiting from "./admin/ApprovalWaiting";
 import Rejected from "./admin/Rejected";
 import PrivateRoute from "./auth/PrivateRoute";
@@ -44,6 +45,8 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/profile" element={<CustomerProfile />} />
             <Route
               path="/farmer/approval-waiting"
               element={
