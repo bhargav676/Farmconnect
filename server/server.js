@@ -6,6 +6,8 @@ const adminRoutes = require('./routes/admin');
 const cropRoutes=require('./routes/crop');
 
 const purchaseRoutes=require('./routes/purchase');
+const chatbotRoutes = require('./routes/chatbotRoutes'); 
+
 require('dotenv').config();
 
 const app = express(); 
@@ -14,7 +16,7 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 
 // Routes
@@ -23,6 +25,8 @@ app.use('/api/crops', cropRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/purchases', purchaseRoutes); 
 app.use('/api/farmer', require('./routes/farmer'));
+app.use('/api/chatbot', chatbotRoutes);
+
 
 const PORT = process.env.PORT || 5000; 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
