@@ -34,7 +34,7 @@ const Login = () => {
           navigate("/farmer/approval-waiting");
         }
       } else {
-        navigate("/customer/dashboard");
+        navigate("/customer/home");
       }
     } catch (err) {
       // Error handled by toast in AuthContext
