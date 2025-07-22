@@ -254,7 +254,7 @@ const CustomerDashboard = () => {
                     </tbody></table></div> )}
                 </div>)}
       </main>
-       <Chatbot purchases={purchases} />
+       <Chatbot purchases={purchases} crops={flattenedCrops}/>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16 border-t border-gray-200/80 py-8">
         <p className="text-center text-sm text-gray-500">© {new Date().getFullYear()} FarmDirect. All rights reserved. Freshness delivered.</p>
       </footer>
