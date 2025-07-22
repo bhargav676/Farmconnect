@@ -5,6 +5,33 @@ import { ClipLoader } from 'react-spinners';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// --- Re-usable Icon Components for Readability ---
+const LocationIcon = () => (
+  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+  </svg>
+);
+
+const CartIcon = ({ count }) => (
+    <div className="relative">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        {count > 0 && (
+            <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                {count}
+            </span>
+        )}
+    </div>
+);
+
+
+const ProfileIcon = () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+);
+
+
 const CustomerDashboard = () => {
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [crops, setCrops] = useState([]);
@@ -223,437 +250,229 @@ const CustomerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans">
       <ToastContainer />
-      <header className="mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 container mx-auto px-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-[Playfair Display]">
-              FarmDirect <span className="text-emerald-600">Marketplace</span>
-            </h1>
-            <p className="text-gray-600">Fresh produce directly from local farmers</p>
-          </div>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <select
-              value={maxDistance}
-              onChange={(e) => setMaxDistance(Number(e.target.value))}
-              className="p-2 border border-emerald-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-            >
-              <option value={10}>10 km</option>
-              <option value={50}>50 km</option>
-              <option value={100}>100 km</option>
-            </select>
-            <button
-              onClick={fetchLocation}
-              disabled={isLoadingLocation}
-              className="flex items-center bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300"
-            >
-              {isLoadingLocation ? (
-                <ClipLoader color="#fff" size={20} className="mr-2" />
-              ) : (
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              )}
-              {isLoadingLocation ? 'Locating...' : 'Update Location'}
-            </button>
-            <button
-              onClick={() => navigate('/cart')}
-              className="relative flex items-center bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-lg shadow-md transition-all duration-300"
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              Cart
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => navigate('/profile')}
-              className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md transition-all duration-300"
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              Profile
-            </button>
-          </div>
-        </div>
-        {location.latitude && location.longitude && (
-          <div className="container mx-auto px-4 flex justify-center">
-            <div className="bg-emerald-50 p-4 rounded-lg shadow-sm inline-flex items-center">
-              <svg
-                className="w-5 h-5 text-emerald-600 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">
-                Your location: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-              </span>
+      <header className="bg-white/80 backdrop-blur-lg sticky top-0 z-30 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
+                {/* Left Section: Title */}
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        Farm<span className="text-emerald-600">Direct</span>
+                    </h1>
+                    <p className="text-xs text-gray-500 hidden sm:block">Fresh from Local Farms</p>
+                </div>
+
+                {/* Center Section: Location and Radius */}
+                <div className="flex-1 flex justify-center items-center space-x-4 px-4">
+                    <button
+                        onClick={fetchLocation}
+                        disabled={isLoadingLocation}
+                        className="flex items-center justify-center h-10 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-full shadow-sm transition-all duration-300"
+                    >
+                        {isLoadingLocation ? <ClipLoader color="#374151" size={20} /> : <LocationIcon />}
+                        <span className="hidden lg:inline ml-2">Update Location</span>
+                    </button>
+                     <div className="flex items-center bg-gray-100 rounded-full h-10 px-4 shadow-sm">
+                        <label htmlFor="distance" className="text-sm font-semibold text-gray-600 mr-2 hidden md:inline">Radius:</label>
+                        <select
+                            id="distance"
+                            value={maxDistance}
+                            onChange={(e) => setMaxDistance(Number(e.target.value))}
+                            className="bg-transparent text-gray-800 font-semibold focus:outline-none focus:ring-0 border-0"
+                        >
+                            <option value={10}>10 km</option>
+                            <option value={50}>50 km</option>
+                            <option value={100}>100 km</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Right Section: Actions */}
+                <div className="flex items-center space-x-2 sm:space-x-4">
+                     <button
+                        onClick={() => navigate('/cart')}
+                        className="h-10 w-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors duration-300"
+                        aria-label="View Cart"
+                    >
+                        <CartIcon count={cartCount} />
+                    </button>
+                    <button
+                        onClick={() => navigate('/profile')}
+                         className="h-10 w-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors duration-300"
+                         aria-label="View Profile"
+                    >
+                        <ProfileIcon />
+                    </button>
+                </div>
             </div>
-          </div>
+        </div>
+        
+        {location.latitude && (
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-3 text-center text-xs text-gray-500">
+                Showing crops near: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+            </div>
         )}
       </header>
-      {error && (
-        <div className="container mx-auto px-4 bg-red-50 border-l-4 border-red-500 p-4 mb-8 rounded-lg flex items-start">
-          <svg
-            className="w-5 h-5 text-red-500 mr-3 mt-0.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <div className="flex-1">
-            <p className="text-red-800">{error}</p>
-            <button
-              onClick={fetchLocation}
-              className="mt-2 text-sm text-red-600 hover:text-red-800 font-medium"
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="container mx-auto px-4 mb-8 border-b border-emerald-200">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setActiveTab('nearby')}
-            className={`py-4 px-1 font-medium text-sm border-b-2 ${
-              activeTab === 'nearby'
-                ? 'border-emerald-600 text-emerald-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-emerald-300'
-            }`}
-          >
-            Nearby Crops
-          </button>
-          <button
-            onClick={() => setActiveTab('purchases')}
-            className={`py-4 px-1 font-medium text-sm border-b-2 ${
-              activeTab === 'purchases'
-                ? 'border-emerald-600 text-emerald-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-emerald-300'
-            }`}
-          >
-            My Purchases
-          </button>
-        </nav>
-      </div>
-      <div className="container mx-auto px-4 mb-12">
-        {activeTab === 'nearby' ? (
-          <>
-            {!location.latitude && !location.longitude && !error && (
-              <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1"
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <h3 className="mt-2 text-lg font-medium text-gray-900 font-[Playfair Display]">
-                  Discover local crops
-                </h3>
-                <p className="mt-1 text-gray-500">
-                  Click "Update Location" to see fresh produce available near you.
-                </p>
-              </div>
-            )}
-            {flattenedCrops.length === 0 && location.latitude && !error && isLoadingCrops && (
-              <div className="text-center py-12">
-                <ClipLoader color="#10B981" size={40} />
-                <p className="mt-4 text-gray-600">Finding fresh crops near you...</p>
-              </div>
-            )}
-            {flattenedCrops.length === 0 && location.latitude && !error && !isLoadingCrops && (
-              <div className="text-center py-12">
-                <p className="text-gray-600">No crops found within {maxDistance} km. Try updating your location or increasing the search radius.</p>
-              </div>
-            )}
-            {flattenedCrops.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {flattenedCrops.map((crop) => (
-                  <div
-                    key={`${crop._id}-${crop.farmerInfo.id}`}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
-                  >
-                    <div className="p-6">
-                      <div className="mb-4">
-                        <img
-                          src={crop.image || 'https://via.placeholder.com/300'}
-                          alt={crop.name}
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                      </div>
-                      <div className="mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-1 font-[Playfair Display]">
-                          {crop.name}
-                        </h3>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg font-bold text-emerald-600">
-                            ₹{crop.price}
-                          </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                            {crop.distance} km away
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {crop.quantity > 0 ? (
-                            `Available: ${crop.quantity} ${crop.unit}`
-                          ) : (
-                            <span className="text-red-600 font-medium">Out of Stock</span>
-                          )}
-                        </p>
-                        {crop.description && (
-                          <p className="text-sm text-gray-500 mt-2">{crop.description}</p>
-                        )}
-                      </div>
-                      <div className="border-t border-emerald-100 pt-4">
-                        <h4 className="text-sm font-medium text-gray-500 mb-2">Sold by:</h4>
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <span className="text-emerald-600 font-medium">
-                              {crop.farmerInfo.name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-900">
-                              {crop.farmerInfo.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {crop.farmerInfo.village}, {crop.farmerInfo.district}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-6 flex items-center justify-between">
-                        <input
-                          type="number"
-                          min="1"
-                          max={crop.quantity}
-                          value={quantityInputs[crop._id] || ''}
-                          onChange={(e) => handleQuantityChange(crop._id, e.target.value)}
-                          placeholder="Quantity"
-                          className="w-24 p-2 border border-emerald-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50"
-                          disabled={crop.quantity === 0}
-                        />
-                        <button
-                          onClick={() => handleAddToCart(crop)}
-                          disabled={!quantityInputs[crop._id] || quantityInputs[crop._id] <= 0 || crop.quantity === 0}
-                          className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                        >
-                          Add to Cart
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="bg-white shadow overflow-hidden rounded-xl">
-            {purchases.length === 0 ? (
-              <div className="text-center py-12">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-                <h3 className="mt-2 text-lg font-medium text-gray-900 font-[Playfair Display]">
-                  No purchases yet
-                </h3>
-                <p className="mt-1 text-gray-500">
-                  Buy some fresh crops from local farmers to see them here.
-                </p>
-                <div className="mt-6">
-                  <button
-                    onClick={() => setActiveTab('nearby')}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-all duration-300"
-                  >
-                    Browse crops
-                  </button>
+
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-8 rounded-r-lg" role="alert">
+                    <p className="font-bold">Error</p>
+                    <p>{error}</p>
                 </div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-emerald-100">
-                  <thead className="bg-emerald-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Crop
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Farmer
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Quantity
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Price
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Status
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-emerald-100">
-                    {purchases.map((purchase) => (
-                      <tr key={purchase._id} className="hover:bg-emerald-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <img
-                                className="h-10 w-10 rounded-full"
-                                src={purchase.image || 'https://via.placeholder.com/40'}
-                                alt={purchase.cropName}
-                              />
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {purchase.cropName}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{purchase.farmerId.name}</div>
-                          <div className="text-sm text-gray-500">{purchase.farmerId.district}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {purchase.quantity} {purchase.unit}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          ₹{purchase.totalPrice}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              purchase.status === 'delivered'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : purchase.status === 'confirmed'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
-                          >
-                            {purchase.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(purchase.createdAt).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             )}
-          </div>
-        )}
-      </div>
-      <footer className="container mx-auto px-4 mt-12 border-t border-emerald-200 pt-8">
+            <div className="flex justify-center mb-8">
+                <div className="flex space-x-2 bg-gray-200 p-1 rounded-full">
+                    <button
+                        onClick={() => setActiveTab('nearby')}
+                        className={`px-6 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${activeTab === 'nearby' ? 'bg-white text-emerald-600 shadow' : 'text-gray-600 hover:bg-gray-300/50'}`}
+                    >
+                        Nearby Crops
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('purchases')}
+                        className={`px-6 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${activeTab === 'purchases' ? 'bg-white text-emerald-600 shadow' : 'text-gray-600 hover:bg-gray-300/50'}`}
+                    >
+                        My Purchases
+                    </button>
+                </div>
+            </div>
+
+            {activeTab === 'nearby' ? (
+                <>
+                    {isLoadingCrops && (
+                         <div className="text-center py-20">
+                            <ClipLoader color="#10B981" size={40} />
+                            <p className="mt-4 text-gray-600 font-semibold">Finding fresh crops near you...</p>
+                        </div>
+                    )}
+                    {!isLoadingCrops && flattenedCrops.length === 0 && (
+                        <div className="text-center py-20 bg-white rounded-2xl shadow-sm">
+                            <p className="text-lg font-semibold text-gray-700">No Crops Found</p>
+                            <p className="mt-2 text-gray-500">Try updating your location or increasing the search radius.</p>
+                        </div>
+                    )}
+                    {!isLoadingCrops && flattenedCrops.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {flattenedCrops.map((crop) => (
+                                <div key={`${crop._id}-${crop.farmerInfo.id}`} className="bg-white rounded-2xl shadow-md overflow-hidden group transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                                    <div className="relative">
+                                        <img src={crop.image || 'https://via.placeholder.com/400'} alt={crop.name} className="w-full h-48 object-cover"/>
+                                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <span className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
+                                            {crop.distance} km away
+                                        </span>
+                                    </div>
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold text-gray-800 truncate">{crop.name}</h3>
+                                        <p className="text-sm text-gray-500 mb-3">
+                                            Sold by <span className="font-semibold">{crop.farmerInfo.name}</span>
+                                        </p>
+                                        <div className="flex items-baseline mb-4">
+                                            <p className="text-2xl font-extrabold text-emerald-600">₹{crop.price}</p>
+                                            <p className="text-sm text-gray-500 ml-1.5">/ {crop.unit}</p>
+                                        </div>
+                                        
+                                        <div className="mt-auto pt-4 border-t border-gray-100">
+                                            <p className="text-sm text-gray-600 mb-3">
+                                                {crop.quantity > 0 ? (
+                                                    `Available: ${crop.quantity} ${crop.unit}`
+                                                ) : (
+                                                    <span className="text-red-500 font-bold">Out of Stock</span>
+                                                )}
+                                            </p>
+                                             <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    max={crop.quantity}
+                                                    value={quantityInputs[crop._id] || ''}
+                                                    onChange={(e) => handleQuantityChange(crop._id, e.target.value)}
+                                                    placeholder="Qty"
+                                                    className="w-20 p-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                                                    disabled={crop.quantity === 0}
+                                                />
+                                                <button
+                                                    onClick={() => handleAddToCart(crop)}
+                                                    disabled={!quantityInputs[crop._id] || quantityInputs[crop._id] <= 0 || crop.quantity === 0}
+                                                    className="flex-1 px-4 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 shadow-sm hover:shadow-md"
+                                                >
+                                                    Add to Cart
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            ) : (
+                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    {purchases.length === 0 ? (
+                        <div className="text-center py-20">
+                            <h3 className="text-xl font-semibold text-gray-700">No Purchase History</h3>
+                            <p className="mt-2 text-gray-500">Your past orders will appear here.</p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        {['Crop', 'Farmer', 'Quantity', 'Price', 'Status', 'Date'].map(header => (
+                                            <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                {header}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {purchases.map((purchase) => (
+                                        <tr key={purchase._id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 h-11 w-11">
+                                                        <img className="h-11 w-11 rounded-full object-cover" src={purchase.image || 'https://via.placeholder.com/40'} alt={purchase.cropName} />
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-semibold text-gray-900">{purchase.cropName}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{purchase.farmerId.name}</div>
+                                                <div className="text-xs text-gray-500">{purchase.farmerId.district}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                {purchase.quantity} {purchase.unit}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">
+                                                ₹{purchase.totalPrice.toFixed(2)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                    purchase.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                                    purchase.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                    {purchase.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {new Date(purchase.createdAt).toLocaleDateString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+      </main>
+      
+      <footer className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 border-t border-gray-200 py-8">
         <p className="text-center text-sm text-gray-500">
           © {new Date().getFullYear()} FarmDirect. All rights reserved.
         </p>
