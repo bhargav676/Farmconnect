@@ -1,4 +1,3 @@
-
 import { useContext, useEffect, useState } from 'react';
 import AuthContext from '../../context/AuthContext';
 import axios from 'axios';
@@ -15,10 +14,10 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, cropName }) => {
     <div className="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 flex justify-center items-center p-4 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-slate-800">Confirm Deletion</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-            <FiX size={24} />
-          </button>
+            <h3 className="text-xl font-bold text-slate-800">Confirm Deletion</h3>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <FiX size={24} />
+            </button>
         </div>
         <p className="text-slate-600 mb-8">
           Are you sure you want to permanently delete <span className="font-semibold text-slate-800">{cropName}</span>? This action cannot be undone.
@@ -141,15 +140,15 @@ const CropUpdateDelete = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
             <div>
-              <h1 className="text-4xl font-bold text-slate-800">Your Listings</h1>
-              <p className="text-slate-500 mt-2 text-lg">Manage your crops available for sale.</p>
+                <h1 className="text-4xl font-bold text-slate-800">Your Listings</h1>
+                <p className="text-slate-500 mt-2 text-lg">Manage your crops available for sale.</p>
             </div>
-            <button
-              onClick={() => navigate('/farmer/dashboard/upload')}
-              className="mt-4 sm:mt-0 flex items-center bg-slate-700 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+             <button
+                onClick={() => navigate('/farmer/dashboard/upload')}
+                className="mt-4 sm:mt-0 flex items-center bg-slate-700 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
             >
-              <FiPlusCircle className="mr-2"/>
-              Add New Crop
+                <FiPlusCircle className="mr-2"/>
+                Add New Crop
             </button>
           </div>
 
@@ -165,61 +164,52 @@ const CropUpdateDelete = () => {
                   <img src={crop.image} alt={crop.name} className="w-full h-52 object-cover" />
                   <div className="p-6 flex-grow">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-2xl font-bold text-slate-800">{crop.name}</h3>
-                      <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full capitalize">{crop.type}</span>
+                        <h3 className="text-2xl font-bold text-slate-800">{crop.name}</h3>
+                        <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full capitalize">{crop.type}</span>
                     </div>
                     <p className="text-sm text-slate-400 mb-5">Posted: {new Date(crop.createdAt).toLocaleDateString()}</p>
                     
                     {editingCropId === crop._id ? (
                       <div className="space-y-4">
                         <div>
-                          <label className="text-sm font-semibold text-slate-600 block mb-1">Quantity ({crop.unit})</label>
-                          <input
-                            type="number"
-                            value={updatedData.quantity}
-                            onChange={(e) => setUpdatedData({...updatedData, quantity: e.target.value})}
-                            className="w-full p-2.5 border border-slate-300 rounded-md transition duration-200 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                          />
+                           <label className="text-sm font-semibold text-slate-600 block mb-1">Quantity ({crop.unit})</label>
+                           <input
+                             type="number"
+                             value={updatedData.quantity}
+                             onChange={(e) => setUpdatedData({...updatedData, quantity: e.target.value})}
+                             className="w-full p-2.5 border border-slate-300 rounded-md transition duration-200 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                           />
                         </div>
-                        <div>
-                          <label className="text-sm font-semibold text-slate-600 block mb-1">Price (per {crop.unit})</label>
-                          <input
-                            type="number"
-                            value={updatedData.price}
-                            onChange={(e) => setUpdatedData({...updatedData, price: e.target.value})}
-                            className="w-full p-2.5 border border-slate-300 rounded-md transition duration-200 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                          />
+                         <div>
+                           <label className="text-sm font-semibold text-slate-600 block mb-1">Price (per {crop.unit})</label>
+                           <input
+                             type="number"
+                             value={updatedData.price}
+                             onChange={(e) => setUpdatedData({...updatedData, price: e.target.value})}
+                             className="w-full p-2.5 border border-slate-300 rounded-md transition duration-200 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                           />
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <p className="text-lg text-slate-700">
-                          <span className="font-semibold text-slate-500">Quantity:</span>{' '}
-                          {Number(crop.quantity) === 0 ? (
-                            <span className="text-rose-600 font-medium">Out of Stock</span>
-                          ) : (
-                            `${crop.quantity} ${crop.unit}`
-                          )}
-                        </p>
-                        <p className="text-lg text-slate-700">
-                          <span className="font-semibold text-slate-500">Price:</span> ₹{crop.price} <span className="text-base text-slate-500">per {crop.unit}</span>
-                        </p>
+                        <p className="text-lg text-slate-700"><span className="font-semibold text-slate-500">Quantity:</span> {crop.quantity} {crop.unit}</p>
+                        <p className="text-lg text-slate-700"><span className="font-semibold text-slate-500">Price:</span> ₹{crop.price} <span className="text-base text-slate-500">per {crop.unit}</span></p>
                       </div>
                     )}
                   </div>
-                  <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center gap-3">
-                    {editingCropId === crop._id ? (
-                      <>
-                        <button onClick={() => handleUpdate(crop._id)} className="flex-1 text-sm font-semibold bg-teal-500 text-white py-2.5 rounded-md hover:bg-teal-600 transition-colors flex items-center justify-center"><FiSave className="mr-2"/>Save</button>
-                        <button onClick={handleCancelEdit} className="flex-1 text-sm font-semibold bg-slate-200 text-slate-700 py-2.5 rounded-md hover:bg-slate-300 transition-colors flex items-center justify-center"><FiXCircle className="mr-2"/>Cancel</button>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => handleEditClick(crop)} className="flex-1 text-sm font-semibold bg-slate-600 text-white py-2.5 rounded-md hover:bg-slate-700 transition-colors flex items-center justify-center"><FiEdit className="mr-2"/>Edit</button>
-                        <button onClick={() => handleDeleteClick(crop)} className="flex-1 text-sm font-semibold bg-rose-500 text-white py-2.5 rounded-md hover:bg-rose-600 transition-colors flex items-center justify-center"><FiTrash2 className="mr-2"/>Delete</button>
-                      </>
-                    )}
-                  </div>
+                   <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center gap-3">
+                      {editingCropId === crop._id ? (
+                        <>
+                           <button onClick={() => handleUpdate(crop._id)} className="flex-1 text-sm font-semibold bg-teal-500 text-white py-2.5 rounded-md hover:bg-teal-600 transition-colors flex items-center justify-center"><FiSave className="mr-2"/>Save</button>
+                           <button onClick={handleCancelEdit} className="flex-1 text-sm font-semibold bg-slate-200 text-slate-700 py-2.5 rounded-md hover:bg-slate-300 transition-colors flex items-center justify-center"><FiXCircle className="mr-2"/>Cancel</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => handleEditClick(crop)} className="flex-1 text-sm font-semibold bg-slate-600 text-white py-2.5 rounded-md hover:bg-slate-700 transition-colors flex items-center justify-center"><FiEdit className="mr-2"/>Edit</button>
+                          <button onClick={() => handleDeleteClick(crop)} className="flex-1 text-sm font-semibold bg-rose-500 text-white py-2.5 rounded-md hover:bg-rose-600 transition-colors flex items-center justify-center"><FiTrash2 className="mr-2"/>Delete</button>
+                        </>
+                      )}
+                    </div>
                 </div>
               ))}
             </div>
