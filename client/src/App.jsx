@@ -12,6 +12,7 @@ import Rejected from "./admin/Rejected";
 import PrivateRoute from "./auth/PrivateRoute";
 import ErrorBoundary from "./auth/ErrorBoundary";
 import CartPage from './customer/CartPage';
+import CropDetailPage from './customer/CropDetailPage';
 
 function App() {
   return (
@@ -48,6 +49,8 @@ function App() {
             />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/profile" element={<CustomerProfile />} />
+            <Route path="/crop/:cropId" element={<CropDetailPage />} />
+
             <Route
               path="/farmer/approval-waiting"
               element={
