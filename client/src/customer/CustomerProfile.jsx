@@ -156,7 +156,7 @@ const CustomerProfile = () => {
             </h1>
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/customer/dashboard')}
                 className="flex items-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-300"
               >
                 <svg
