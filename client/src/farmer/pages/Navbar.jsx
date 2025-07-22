@@ -68,7 +68,7 @@ const Navbar = () => {
           <div className="flex-shrink-0">
             {/* UPDATED: Logo text uses the main brand green color */}
             <NavLink to="/farmer/dashboard" className="flex items-center space-x-3 text-[#16a34a]">
-              <span className="text-xl font-bold tracking-wider">FarmConnect</span>
+              <span className="text-xl font-bold tracking-wider">FarmDirect</span>
             </NavLink>
           </div>
          

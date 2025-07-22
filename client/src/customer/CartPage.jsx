@@ -39,22 +39,42 @@ const CartPage = () => {
   };
 
   const updateCropQuantity = async (cropId, quantity) => {
-    try { await axios.patch(`http://localhost:5000/api/crops/${cropId}`, { quantity }, { headers: { Authorization: `Bearer ${token}` } });
-    } catch (err) { throw new Error(err.response?.data?.message || 'Error updating crop quantity.'); }
+    try {
+      await axios.patch(`http://localhost:5000/api/crops/${cropId}`, { quantity }, { headers: { Authorization: `Bearer ${token}` } });
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Error updating crop quantity.');
+    }
   };
 
+  // *** CORRECTED LOGIC: Handler for removing an item ***
   const handleRemoveItem = async (cropId) => {
-    if (isLoading) return; // Prevent action while another is processing
-    try {
-      const item = cartItems.find((item) => item.cropId === cropId);
-      if (item) { await updateCropQuantity(cropId, item.originalQuantity); }
+      if (isLoading) return; // Prevent multiple actions
+
+      const itemToRemove = cartItems.find((item) => item.cropId === cropId);
+      if (!itemToRemove) return; // Item not found, do nothing
+
+      // Optimistically update the UI for a faster user experience
       const updatedCart = cartItems.filter((item) => item.cropId !== cropId);
       setCartItems(updatedCart);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       window.dispatchEvent(new Event('storage'));
       toast.info('Item removed from cart', { icon: '🗑️' });
-    } catch (err) { toast.error(err.message); }
+
+      try {
+          // Check if originalQuantity is a valid number before making the API call
+          if (typeof itemToRemove.originalQuantity === 'number') {
+              await updateCropQuantity(cropId, itemToRemove.originalQuantity);
+          } else {
+              // This warning is useful for debugging to confirm originalQuantity is missing
+              console.warn(`originalQuantity not found for cropId: ${cropId}. Skipping server quantity update.`);
+          }
+      } catch (err) {
+          // Notify the user if the server update fails. The item is already removed from the local cart.
+          // You could add logic here to revert the local state if the server update is critical.
+          toast.error(`Could not update server stock: ${err.message}`);
+      }
   };
+
 
   // *** NEW LOGIC: Handler for buying a single item ***
   const handleBuyItem = async (item) => {
@@ -63,14 +83,12 @@ const CartPage = () => {
     try {
       await axios.post('http://localhost:5000/api/purchases', { cropId: item.cropId, quantity: item.quantity, farmerId: item.farmerId, }, { headers: { Authorization: `Bearer ${token}` } } );
       
-      // Remove only the purchased item from the cart
       const updatedCart = cartItems.filter((cartItem) => cartItem.cropId !== item.cropId);
       setCartItems(updatedCart);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       window.dispatchEvent(new Event('storage'));
 
       toast.success(`Successfully purchased ${item.cropName}!`, { icon: '🌾' });
-      // We stay on the cart page in case they want to buy another item
     } catch (err) { 
         toast.error(err.response?.data?.message || 'Error purchasing item.');
     } finally { 
@@ -151,7 +169,6 @@ const CartPage = () => {
                              <input type="text" readOnly value={item.quantity} className="w-10 text-center font-semibold border-0 focus:ring-0 bg-transparent"/>
                              <button onClick={() => handleQuantityChange(item.cropId, item.quantity + 1)} disabled={isLoading} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50">+</button>
                          </div>
-                         {/* *** NEW UI: Buy Now and Remove Buttons *** */}
                          <div className="flex items-center space-x-2 w-full">
                             <button onClick={() => handleBuyItem(item)} disabled={isLoading} className="w-full text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-full py-2 px-3 transition-colors disabled:opacity-50">Buy Now</button>
                             <button onClick={() => handleRemoveItem(item.cropId)} disabled={isLoading} className="flex-shrink-0 w-9 h-9 flex items-center justify-center text-red-500 bg-red-50 hover:bg-red-100 rounded-full transition-colors disabled:opacity-50"><TrashIcon/></button>
