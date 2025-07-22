@@ -1,15 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import Login from "./Login";
-import Register from "./Register";
-import RegisterFarmer from "./RegisterFarmer";
+import Login from "./auth/Login";
+import Register from "./auth/Register";
+import RegisterFarmer from "./auth/RegisterFarmer";
 import AdminDashboard from "./admin/AdminDashboard";
 import FarmerDashboard from "./farmer/FarmerDashboard";
 import CustomerDashboard from "./customer/CustomerDashboard";
+import CustomerProfile  from "./customer/CustomerProfile";
 import ApprovalWaiting from "./admin/ApprovalWaiting";
 import Rejected from "./admin/Rejected";
-import PrivateRoute from "./PrivateRoute";
-import ErrorBoundary from "./ErrorBoundary";
+import PrivateRoute from "./auth/PrivateRoute";
+import ErrorBoundary from "./auth/ErrorBoundary";
+import CartPage from './customer/CartPage';
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/profile" element={<CustomerProfile />} />
             <Route
               path="/farmer/approval-waiting"
               element={

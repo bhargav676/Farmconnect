@@ -153,3 +153,37 @@ exports.deleteCrop = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+
+exports.updateCropQuantity = async (req, res) => {
+  try {
+    const { cropId } = req.params;
+    const { quantity } = req.body;
+
+    // Validate quantity
+    if (quantity === undefined || quantity < 0) {
+      return res.status(400).json({ message: 'Invalid quantity' });
+    }
+
+    // Find Crop document containing the subdocument with cropId
+    const cropDoc = await Crop.findOne({ 'crops._id': cropId });
+    if (!cropDoc) {
+      return res.status(404).json({ message: 'Crop not found' });
+    }
+
+    // Find and update the specific crop subdocument
+    const subCrop = cropDoc.crops.id(cropId);
+    if (!subCrop) {
+      return res.status(404).json({ message: 'Crop subdocument not found' });
+    }
+
+    subCrop.quantity = quantity;
+    subCrop.updatedAt = Date.now(); // Update timestamp
+    await cropDoc.save();
+
+    res.json({ message: 'Crop quantity updated', crop: subCrop });
+  } catch (err) {
+    console.error('Update crop quantity error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
