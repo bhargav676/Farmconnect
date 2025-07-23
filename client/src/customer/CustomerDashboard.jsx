@@ -5,6 +5,7 @@ import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Chatbot from './Chatbot'
 
 // --- Re-usable Icon Components for Clarity ---
 const LocationIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>;
@@ -253,6 +254,7 @@ const CustomerDashboard = () => {
                     </tbody></table></div> )}
                 </div>)}
       </main>
+       <Chatbot purchases={purchases} crops={flattenedCrops}/>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16 border-t border-gray-200/80 py-8">
         <p className="text-center text-sm text-gray-500">© {new Date().getFullYear()} FarmDirect. All rights reserved. Freshness delivered.</p>
       </footer>
