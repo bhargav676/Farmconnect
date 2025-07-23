@@ -1,6 +1,7 @@
 // src/components/HomePage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // Icon Components
 const CartIcon = ({ count }) => (
@@ -83,7 +84,7 @@ const HomePage = () => {
     };
   }, []);
 
-  // Fetch featured crops from local api.json
+  // Fetch featured crops from API (same as CustomerDashboard)
   useEffect(() => {
     fetchFeaturedCrops();
   }, []);
@@ -91,41 +92,101 @@ const HomePage = () => {
   const fetchFeaturedCrops = async () => {
     setIsLoadingCrops(true);
     try {
-      const response = await fetch("/api.json");
-      const crops = await response.json();
+      const token = localStorage.getItem("token");
 
-      // Shuffle the array and take 6 random crops for featured section
-      const shuffledCrops = crops.sort(() => 0.5 - Math.random());
-      const selectedCrops = shuffledCrops.slice(0, 6).map((crop, index) => ({
-        _id: `crop-${index}`,
-        name: crop.name,
-        image: crop.image,
-        type: crop.type,
-        unit: crop.unit,
-        price: Math.round((Math.random() * 8 + 2) * 100) / 100, // Random price between $2-$10 as number
-        quantity: Math.floor(Math.random() * 50 + 10), // Random quantity 10-60
-        farmerName: `Local ${crop.type === "fruits" ? "Orchard" : "Farm"}`,
-        location: "Local Farm",
-      }));
-
-      setFeaturedCrops(selectedCrops);
+      // Try to get user's location for nearby crops, fallback to default location
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          await getCropsData(latitude, longitude, token);
+        },
+        async (error) => {
+          // Fallback to default location if geolocation fails
+          console.log("Location access denied, using default location");
+          await getCropsData(40.7128, -74.006, token); // Default to New York coordinates
+        }
+      );
     } catch (error) {
-      console.error("Error fetching crops from api.json:", error);
+      console.error("Error fetching crops:", error);
       setFeaturedCrops([]);
     } finally {
       setIsLoadingCrops(false);
     }
   };
 
+  const getCropsData = async (latitude, longitude, token) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/crops/nearby-crops",
+        {
+          latitude,
+          longitude,
+          maxDistance: 50, // Search within 50km
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      // Flatten the crops data like in CustomerDashboard
+      const flattenedCrops = response.data.crops.reduce((acc, farmer) => {
+        if (
+          !farmer ||
+          !farmer.crops ||
+          !farmer.farmerName ||
+          !farmer.farmerId ||
+          !farmer.farmerDetails
+        ) {
+          return acc;
+        }
+        farmer.crops.forEach((crop) => {
+          acc.push({
+            ...crop,
+            farmerInfo: {
+              name: farmer.farmerName,
+              id: farmer.farmerId,
+              village: farmer.farmerDetails.villageMandal,
+              district: farmer.farmerDetails.district,
+            },
+          });
+        });
+        return acc;
+      }, []);
+
+      // Take only first 6 crops for featured section
+      setFeaturedCrops(flattenedCrops.slice(0, 6));
+    } catch (error) {
+      console.error("Error fetching crops from API:", error);
+      setFeaturedCrops([]);
+    }
+  };
+
   const addToCart = (crop) => {
     try {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const existingItem = cart.find((item) => item._id === crop._id);
+
+      // Transform crop data to match CartPage expectations (same as CustomerDashboard)
+      const cartItem = {
+        cropId: crop._id,
+        farmerId: crop.farmerInfo.id,
+        cropName: crop.name,
+        unit: crop.unit,
+        quantity: 1,
+        price: crop.price,
+        total: crop.price,
+        farmerName: crop.farmerInfo.name,
+        village: crop.farmerInfo.village,
+        district: crop.farmerInfo.district,
+        image: crop.image,
+      };
+
+      const existingItem = cart.find((item) => item.cropId === crop._id);
 
       if (existingItem) {
         existingItem.quantity += 1;
+        existingItem.total = existingItem.price * existingItem.quantity;
       } else {
-        cart.push({ ...crop, quantity: 1 });
+        cart.push(cartItem);
       }
 
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -240,35 +301,35 @@ const HomePage = () => {
               <div className="hidden md:block ml-10">
                 <div className="flex space-x-4">
                   <a
-                    href="#"
+                    href="#home"
                     className="text-green-600 font-medium px-3 py-2 rounded-md hover:bg-green-50 transition"
                   >
                     Home
                   </a>
                   <a
-                    href="#"
+                    href="#features"
                     className="text-gray-700 hover:text-green-600 font-medium px-3 py-2 rounded-md hover:bg-green-50 transition"
                   >
-                    About
+                    Features
                   </a>
                   <a
-                    href="#"
+                    href="#products"
                     className="text-gray-700 hover:text-green-600 font-medium px-3 py-2 rounded-md hover:bg-green-50 transition"
                   >
-                    Products
+                    Fresh Products
                   </a>
                   <a
-                    href="#"
+                    href="#farmers"
                     className="text-gray-700 hover:text-green-600 font-medium px-3 py-2 rounded-md hover:bg-green-50 transition"
                   >
-                    Farmers
+                    Our Farmers
                   </a>
-                  <a
-                    href="#"
+                  <button
+                    onClick={() => navigate("/customer/dashboard")}
                     className="text-gray-700 hover:text-green-600 font-medium px-3 py-2 rounded-md hover:bg-green-50 transition"
                   >
-                    Contact
-                  </a>
+                    Shop Now
+                  </button>
                 </div>
               </div>
             </div>
@@ -334,35 +395,42 @@ const HomePage = () => {
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg">
               <a
-                href="#"
+                href="#home"
                 className="text-green-600 block px-3 py-2 rounded-md font-medium"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </a>
               <a
-                href="#"
+                href="#features"
                 className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md font-medium"
+                onClick={() => setIsMenuOpen(false)}
               >
-                About
+                Features
               </a>
               <a
-                href="#"
+                href="#products"
                 className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md font-medium"
+                onClick={() => setIsMenuOpen(false)}
               >
-                Products
+                Fresh Products
               </a>
               <a
-                href="#"
+                href="#farmers"
                 className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md font-medium"
+                onClick={() => setIsMenuOpen(false)}
               >
-                Farmers
+                Our Farmers
               </a>
-              <a
-                href="#"
-                className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md font-medium"
+              <button
+                onClick={() => {
+                  navigate("/customer/dashboard");
+                  setIsMenuOpen(false);
+                }}
+                className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md font-medium w-full text-left"
               >
-                Contact
-              </a>
+                Shop Now
+              </button>
               <div className="pt-2 border-t mt-2 flex justify-center space-x-4">
                 <button
                   onClick={() => navigate("/cart")}
@@ -384,6 +452,7 @@ const HomePage = () => {
 
       {/* Hero Section */}
       <div
+        id="home"
         className="relative flex content-center items-center justify-center"
         style={{
           minHeight: "100vh", // Full viewport height
@@ -464,7 +533,7 @@ const HomePage = () => {
       </div>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section id="features" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center text-center mb-16">
             <div className="w-full lg:w-6/12 px-4">
@@ -552,7 +621,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Products/Crops Section */}
-      <section className="py-20 bg-gray-50">
+      <section id="products" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center text-center mb-16">
             <div className="w-full lg:w-6/12 px-4">
@@ -570,75 +639,68 @@ const HomePage = () => {
           {isLoadingCrops ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+              <p className="ml-4 text-gray-600 font-semibold">
+                Loading fresh crops...
+              </p>
             </div>
           ) : featuredCrops.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {featuredCrops.map((crop) => (
+              {featuredCrops.map((crop, index) => (
                 <div
                   key={crop._id}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group"
                 >
                   <div className="relative">
                     <img
-                      src={crop.image}
+                      src={crop.image || "https://via.placeholder.com/400"}
                       alt={crop.name}
-                      className="w-full h-48 object-cover"
-                      onError={(e) => {
-                        // Fallback to gradient background if image fails to load
-                        e.target.style.display = "none";
-                        e.target.nextSibling.style.display = "flex";
-                      }}
+                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="w-full h-48 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 items-center justify-center hidden">
-                      <div className="text-white text-center">
-                        <div className="text-6xl mb-2">
-                          {crop.type === "fruits" ? "🍎" : "🥕"}
-                        </div>
-                      </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                    <div className="absolute bottom-3 left-4">
+                      <h3 className="text-xl font-bold text-white tracking-tight shadow-sm">
+                        {crop.name}
+                      </h3>
+                      <p className="text-xs text-emerald-200 font-semibold group-hover:text-white transition-colors">
+                        by {crop.farmerInfo.name}
+                      </p>
                     </div>
-                    <div className="absolute top-4 left-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold capitalize">
-                      {crop.type === "fruits"
-                        ? "Fresh Fruit"
-                        : "Fresh Vegetable"}
-                    </div>
+                    {crop.distance && (
+                      <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                        {crop.distance} km
+                      </span>
+                    )}
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">
-                      {crop.name}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {crop.description ||
-                        `Fresh ${crop.name?.toLowerCase()} from local farms`}
-                    </p>
-                    {crop.farmerName && (
-                      <p className="text-sm text-gray-500 mb-2">
-                        From: {crop.farmerName}
-                      </p>
-                    )}
-                    {crop.location && (
-                      <p className="text-sm text-gray-400 mb-4">
-                        📍 {crop.location}
-                      </p>
-                    )}
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="text-2xl font-bold text-emerald-600">
-                          ${crop.price.toFixed(2)}/{crop.unit}
+                    <div className="flex items-baseline justify-between mb-4">
+                      <p className="text-3xl font-extrabold text-emerald-500">
+                        ₹{crop.price}
+                        <span className="text-sm font-medium text-gray-500">
+                          /{crop.unit}
                         </span>
-                        {crop.quantity && (
-                          <div className="text-sm text-gray-500">
-                            {crop.quantity}
-                            {crop.unit} available
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => addToCart(crop)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+                      </p>
+                      <p
+                        className={`text-sm font-bold ${
+                          crop.quantity > 0 ? "text-gray-600" : "text-red-500"
+                        }`}
                       >
-                        Add to Cart
-                      </button>
+                        {crop.quantity > 0
+                          ? `Stock: ${crop.quantity}`
+                          : "Out of Stock"}
+                      </p>
                     </div>
+                    {crop.farmerInfo.village && (
+                      <p className="text-sm text-gray-500 mb-4">
+                        📍 {crop.farmerInfo.village}, {crop.farmerInfo.district}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => addToCart(crop)}
+                      disabled={crop.quantity === 0}
+                      className="w-full px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold rounded-lg hover:from-emerald-600 hover:to-green-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                    >
+                      {crop.quantity === 0 ? "Out of Stock" : "Add to Cart"}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -690,6 +752,7 @@ const HomePage = () => {
 
       {/* CTA Section */}
       <section
+        id="farmers"
         className="py-20"
         style={{
           background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
@@ -812,7 +875,6 @@ const HomePage = () => {
                     Products
                   </a>
                 </li>
-                
               </ul>
             </div>
             <div className="w-full md:w-4/12 px-4">
