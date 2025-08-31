@@ -16,7 +16,7 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'https://farmconnect-puce.vercel.app' }));
 app.use(express.json());
 
 // Routes
