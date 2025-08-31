@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const CustomersPanel = ({ showNotification }) => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,7 @@ const CustomersPanel = ({ showNotification }) => {
     const fetchCustomers = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/admin/customers",
+          `${API_URL}/api/admin/customers`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

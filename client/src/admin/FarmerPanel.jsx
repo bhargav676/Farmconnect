@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaIdCard, FaSeedling, 
          FaRupeeSign, FaInfoCircle, FaBan, FaCheck } from "react-icons/fa";
 
@@ -14,7 +16,7 @@ const FarmersPanel = ({ showNotification }) => {
     const fetchFarmers = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/admin/farmers",
+          `${API_URL}/api/admin/farmers`,
           {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           }

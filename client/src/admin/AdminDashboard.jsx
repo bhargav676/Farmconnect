@@ -2,6 +2,9 @@ import { useState, useContext, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuthContext from "../context/AuthContext";
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 import FarmerRegistrations from "./FarmerRegistrations";
 import FarmersPanel from "./FarmerPanel";
 import CropsPanel from "./CropPanel";
@@ -57,7 +60,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:5000/api/admin/dashboard",
+        `${API_URL}/api/admin/dashboard`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

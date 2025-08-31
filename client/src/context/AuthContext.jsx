@@ -2,6 +2,8 @@ import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -13,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       axios
-        .get('http://localhost:5000/api/auth/me', {
+        .get(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -41,9 +43,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       localStorage.setItem('token', response.data.token);
-      const userRes = await axios.get('http://localhost:5000/api/auth/me', {
+      const userRes = await axios.get(`${API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${response.data.token}` },
       });
       setUser({
@@ -75,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, role = 'customer', farmerData = {}) => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
         name,
         email,
         password,
@@ -83,7 +85,7 @@ export const AuthProvider = ({ children }) => {
         farmerData,
       });
       localStorage.setItem('token', response.data.token);
-      const userRes = await axios.get('http://localhost:5000/api/auth/me', {
+      const userRes = await axios.get(`${API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${response.data.token}` },
       });
       setUser({

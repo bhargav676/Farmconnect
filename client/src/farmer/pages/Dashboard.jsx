@@ -4,6 +4,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import AuthContext from "../../context/AuthContext";
 import { ClipLoader } from "react-spinners";
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 import {
   HiOutlineChartPie,
   HiOutlineCurrencyRupee,
@@ -100,7 +102,7 @@ const Dashboard = () => {
       let currentUser = user;
       if (!user && token) {
         try {
-          const userRes = await axios.get("http://localhost:5000/api/auth/me", {
+          const userRes = await axios.get(`${API_URL}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           currentUser = {
@@ -123,7 +125,7 @@ const Dashboard = () => {
       }
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/farmer/${currentUser._id}`,
+          `${API_URL}/api/farmer/${currentUser._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const sortedSummary = res.data.summary.sort(

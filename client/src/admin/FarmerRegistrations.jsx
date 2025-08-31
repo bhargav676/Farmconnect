@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 import { FaCheck, FaTimes, FaEye, FaSpinner } from "react-icons/fa";
 
 const FarmerRegistrations = ({ showNotification }) => {
@@ -14,7 +16,7 @@ const FarmerRegistrations = ({ showNotification }) => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:5000/api/admin/farmers",
+          `${API_URL}/api/admin/farmers`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -41,7 +43,7 @@ const FarmerRegistrations = ({ showNotification }) => {
     
     try {
       await axios.post(
-        `http://localhost:5000/api/admin/farmer/${id}/${action}`,
+        `${API_URL}/api/admin/farmer/${id}/${action}`,
         {},
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );

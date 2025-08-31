@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Chatbot from "./Chatbot";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // --- Re-usable Icon Components for Clarity ---
 const LocationIcon = () => (
     <svg
@@ -190,7 +192,7 @@ const CustomerDashboard = () => {
         setIsLoadingCrops(true);
         try {
             const response = await axios.post(
-                "http://localhost:5000/api/crops/nearby-crops",
+                `${API_URL}/api/crops/nearby-crops`,
                 { latitude, longitude, maxDistance },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -205,7 +207,7 @@ const CustomerDashboard = () => {
 
     const fetchPurchases = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/purchases", {
+            const response = await axios.get(`${API_URL}/api/purchases`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setPurchases(response.data);

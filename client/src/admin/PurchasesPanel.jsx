@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const PurchasesPanel = ({ showNotification }) => {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ const PurchasesPanel = ({ showNotification }) => {
     const fetchPurchases = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/admin/purchases",
+          `${API_URL}/api/admin/purchases`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

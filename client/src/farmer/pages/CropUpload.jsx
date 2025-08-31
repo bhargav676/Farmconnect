@@ -5,6 +5,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
 import { ClipLoader } from 'react-spinners';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 import {
   HiOutlineUpload,
   HiOutlineScale,
@@ -96,7 +98,7 @@ const CropUpload = () => {
       }
       if (!user) {
         try {
-          const userRes = await axios.get('http://localhost:5000/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+          const userRes = await axios.get(`${API_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
           setUser(userRes.data);
         } catch (err) {
           toast.error('Session expired. Please log in again.');
@@ -173,7 +175,7 @@ const CropUpload = () => {
     setIsSubmitting(true);
     try {
       const payload = { ...formData, farmerId: user._id };
-      const res = await axios.post('http://localhost:5000/api/crops/crop', payload, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${API_URL}/api/crops/crop`, payload, { headers: { Authorization: `Bearer ${token}` } });
       setAlert({ type: 'success', message: res.data.message || 'Crop listed successfully!' });
       toast.success('Crop listed successfully!');
       setFormData({ cropName: '', quantity: '', unit: '', price: '', image: '', type: '' });

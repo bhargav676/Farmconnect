@@ -1,9 +1,11 @@
-  import { useContext, useEffect, useState } from 'react';
-  import AuthContext from '../../context/AuthContext';
-  import axios from 'axios';
-  import { toast } from 'react-toastify';
-  import { ClipLoader } from 'react-spinners';
-  import { FiShoppingCart } from 'react-icons/fi';
+import { useContext, useEffect, useState } from 'react';
+import AuthContext from '../../context/AuthContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { ClipLoader } from 'react-spinners';
+import { FiShoppingCart } from 'react-icons/fi';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // A small component for the summary stat cards
   const StatCard = ({ image, title, value }) => {
@@ -44,7 +46,7 @@
       setLoading(true);
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/purchases/farmer/${user._id}`, 
+          `${API_URL}/api/purchases/farmer/${user._id}`, 
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -62,7 +64,7 @@
     const handleStatusUpdate = async (purchaseId, newStatus) => {
       try {
         const res = await axios.patch(
-          `http://localhost:5000/api/purchases/${purchaseId}/status`,
+          `${API_URL}/api/purchases/${purchaseId}/status`,
           { status: newStatus },
           {
             headers: { Authorization: `Bearer ${token}` },

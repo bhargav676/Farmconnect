@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const ApprovalWaiting = () => {
   const { user, farmerStatus, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -32,7 +34,7 @@ const ApprovalWaiting = () => {
     // Polling for status updates
     const statusInterval = setInterval(async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/me", {
+        const response = await axios.get(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (response.data.farmerStatus === "approved") {

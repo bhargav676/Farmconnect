@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Icon Components
 const CartIcon = ({ count }) => (
   <div className="relative">
@@ -117,7 +119,7 @@ const HomePage = () => {
   const getCropsData = async (latitude, longitude, token) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/crops/nearby-crops",
+        `${API_URL}/api/crops/nearby-crops`,
         {
           latitude,
           longitude,
